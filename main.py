@@ -1,4 +1,7 @@
-# Fast API entry point
+# Default
+# Local
+from src.models import Reactflow
+# Third party
 from fastapi import FastAPI
 
 # Initialize fast APi
@@ -11,14 +14,8 @@ async def root():
     return{"message": "Hello world"}
 
 
-# TODO:
-# Response model for the jitsujournal friendly
-# directed graph/flowchart
-
-
-
 # Actual endpoint for processing a given user problem
-@app.get('/solve/{problem}')
+@app.get('/solve/{problem}')#, response_model=Reactflow)
 def solve(problem: str):
     """
     Given a problem faced by the user in their jiu-jitsu practice,
@@ -26,4 +23,16 @@ def solve(problem: str):
     Passed into the app for creating initial nodes and edges.
     """
     print(problem)
+
+    # Generate a hypothetical solution using the user's problem
+    # Retrive similar records to the generated solution from Supabase
+    # Use similar records to ground generated answer (rerank if necessary)
+    # Convert grounded answer into steps in a sequence
+    # Load techniques into memory for passing as context in next stage
+    # Map steps into a light weight list of nodes and edges
+    # Parse lists into react-flow friendly shapes
+    # Pack response into model declared above and send with code
+    # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
+
+
     return{"problem": problem}
