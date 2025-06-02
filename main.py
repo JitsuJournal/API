@@ -1,28 +1,40 @@
-# Default
+# System
+import os
+from dotenv import load_dotenv
 # Local
 from src.models import Reactflow
 # Third party
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from google import genai
+
+load_dotenv()
+
+# NOTE: Can be cached with lru_cache
+# Gemini connection as a shared dependency
+def get_gemini():
+    # Initilize geni AI client to use Gemini
+    client = genai.Client(api_key=os.getenv('GEMINI'))
+    return client
+
 
 # Initialize fast APi
 app = FastAPI()
-
 
 # Placeholder endpoint for webservice root
 @app.get('/')
 async def root():
     return{"message": "Hello world"}
 
-
 # Actual endpoint for processing a given user problem
 @app.get('/solve/{problem}')#, response_model=Reactflow)
-def solve(problem: str):
+def solve(problem: str, client=Depends(get_gemini)):
     """
     Given a problem faced by the user in their jiu-jitsu practice,
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
     print(problem)
+    print(client)
 
     # Generate a hypothetical solution using the user's problem
     # Retrive similar records to the generated solution from Supabase
