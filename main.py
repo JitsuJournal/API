@@ -3,7 +3,7 @@ from typing import Annotated
 # Local
 from src.models import Reactflow
 from src.models.general import Solution
-from src.services.llm import get_gemini, create_paragraph, create_embedding
+from src.services.llm import get_gemini, create_paragraph, create_embedding, ground
 from src.services.db import get_supabase, similarity_search
 # Third party
 from fastapi import FastAPI, Depends
@@ -40,13 +40,20 @@ def solve(
     vector: list[float] = embedding.embeddings[0].values
 
     # Retrive similar records to the generated solution from Supabase
+    # NOTE: Using default match threshold and count for searching
     response = similarity_search(client=supabase, vector=vector)
-    print(response)
 
     paragraphs: list[str] = [data['content'] for data in response.data]
 
-    # Use similar records to ground generated answer (rerank if necessary)
+    # Use top-k records in similar
+    # to gound the hypothetical result
+    grounded: Solution = ground(client=gemini, problem=problem, 
+                      paragraphs=paragraphs, solution=hypothetical.paragraph).parsed
+
+
     # Convert grounded answer into steps in a sequence
+
+
     # Load techniques into memory for passing as context in next stage
     # Map steps into a light weight list of nodes and edges
     # Parse lists into react-flow friendly shapes
@@ -54,4 +61,4 @@ def solve(
     # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
 
 
-    return {"problem": problem, "findings": paragraphs}
+    return {"problem": problem, "grounded": grounded.model_dump()}

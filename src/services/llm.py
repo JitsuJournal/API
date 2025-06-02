@@ -48,3 +48,39 @@ def create_embedding(client: genai.Client, paragraph: str):
         contents=[paragraph],
     )
     return embedding
+
+def ground(client:genai.Client, problem:str, paragraphs: list[str], solution: str):
+    """
+    Given a list of paragraphs as strings, a users problem in jiu-jitsu,
+    and hypotehtical solution; ground said solution
+    to actually use the techniques, positions, and paths from the paragraphs.
+    Also refer to the paragraphs to remove contradictions and inconsistences
+    from the generated solution.
+    """
+    grounded = client.models.generate_content(
+        model="gemini-2.5-flash-preview-05-20",
+        config=types.GenerateContentConfig(
+            system_instruction="""
+                You are a expert in brazilian gi and no-gi jiu-jitsu and 
+                a professional coach capable of evaluating 
+                jiu-jitsu sequences and assessing if they solve a 
+                user problem.
+            """,
+            response_mime_type="application/json",
+            response_schema=Solution,
+            temperature=0.25
+        ),
+        contents=[problem, paragraphs, solution,
+            """
+            Given a problem faced by a jiu-jitsu practitioner, 
+            a list of paragraphs as potential solutions retrieved
+            from youtube tutorials, and a generated solution;
+            ground said solution to actually use the techniques, 
+            positions, and paths from the relevant paragraphs.
+            
+            Also refer to the paragraphs to remove any contradictions 
+            or inconsistences from the generated solution. Ignore
+            paragraphs that don't actually solve the user problem.
+            """]
+    )
+    return grounded
