@@ -4,9 +4,11 @@ from typing import Annotated
 from src.models import Reactflow
 from src.models.general import Solution
 from src.services.llm import get_gemini, create_paragraph, create_embedding
+from src.services.db import get_supabase
 # Third party
 from fastapi import FastAPI, Depends
-from google.genai import Client
+from google.genai import Client as LlmClient
+from supabase import Client as DbClient
 
 # Initialize fast APi
 app = FastAPI()
@@ -18,7 +20,11 @@ async def root():
 
 # Actual endpoint for processing a given user problem
 @app.get('/solve/{problem}')#, response_model=Reactflow)
-def solve(problem: str, client: Annotated[Client, Depends(get_gemini)]):
+def solve(
+        problem: str, 
+        gemini: Annotated[LlmClient, Depends(get_gemini)],
+        supabase: Annotated[DbClient, Depends(get_supabase)],
+    ):
     """
     Given a problem faced by the user in their jiu-jitsu practice,
     return a jitsu-journal friendly directed graph/flowchart.
@@ -26,15 +32,17 @@ def solve(problem: str, client: Annotated[Client, Depends(get_gemini)]):
     """
 
     # Create a hypothetical solution paragraph using the users problem
-    hypothetical: Solution = create_paragraph(client, problem).parsed
+    hypothetical: Solution = create_paragraph(gemini, problem).parsed
 
     # Create embedding using the hypothetical solution
     # Used for searching tutorials with similar content
-    embedding = create_embedding(client, paragraph=hypothetical.paragraph)
+    embedding = create_embedding(gemini, paragraph=hypothetical.paragraph)
     vector: list[float] = embedding.embeddings[0].values
 
     print(vector)
 
+
+    print(supabase)
     # Retrive similar records to the generated solution from Supabase
 
 

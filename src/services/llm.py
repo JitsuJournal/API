@@ -5,16 +5,15 @@ from dotenv import load_dotenv
 from ..models.general import Solution
 # Third Party
 from google import genai
-from google.genai import types
+from google.genai import types, Client
 
 load_dotenv()
 
 # NOTE: Can be cached with lru_cache
 # Gemini connection as a shared dependency
-def get_gemini():
-    # Initilize geni AI client to use Gemini
-    client = genai.Client(api_key=os.getenv('GEMINI'))
-    return client
+# Initilize geni AI client to use Gemini
+def get_gemini() -> Client:
+    return genai.Client(api_key=os.getenv('GEMINI'))
 
 def create_paragraph(client: genai.Client, problem: str):
     """
