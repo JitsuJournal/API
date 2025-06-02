@@ -45,10 +45,4 @@ def get_techniques(client: Client)->str:
         {**record, "sub_id": record["sub_id"]["cat_id"]}
         for record in response.data
     ]
-    return json.dumps(data, indent=2)
-
-
-if __name__=="__main__":
-    client = conn_supabase()
-    response = get_techniques(client)
-    print(response)
+    return json.dumps(data)
