@@ -3,19 +3,12 @@ import os
 from dotenv import load_dotenv
 # Local
 from src.models import Reactflow
+from src.services.llm import get_gemini
 # Third party
 from fastapi import FastAPI, Depends
 from google import genai
 
 load_dotenv()
-
-# NOTE: Can be cached with lru_cache
-# Gemini connection as a shared dependency
-def get_gemini():
-    # Initilize geni AI client to use Gemini
-    client = genai.Client(api_key=os.getenv('GEMINI'))
-    return client
-
 
 # Initialize fast APi
 app = FastAPI()
