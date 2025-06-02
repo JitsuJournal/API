@@ -3,7 +3,7 @@ from typing import Annotated
 # Local
 from src.models import Reactflow
 from src.models.general import Solution
-from src.services.llm import get_gemini, create_paragraph
+from src.services.llm import get_gemini, create_paragraph, create_embedding
 # Third party
 from fastapi import FastAPI, Depends
 from google.genai import Client
@@ -30,8 +30,10 @@ def solve(problem: str, client: Annotated[Client, Depends(get_gemini)]):
 
     # Create embedding using the hypothetical solution
     # Used for searching tutorials with similar content
+    embedding = create_embedding(client, paragraph=hypothetical.paragraph)
+    vector: list[float] = embedding.embeddings[0].values
 
-
+    print(vector)
 
     # Retrive similar records to the generated solution from Supabase
 

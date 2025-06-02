@@ -38,3 +38,14 @@ def create_paragraph(client: genai.Client, problem: str):
             """]
     )
     return solution
+
+def create_embedding(client: genai.Client, paragraph: str):
+    """
+    Given a paragraph, convert it to a embedding using 
+    Gemini text embedding models.
+    """
+    embedding = client.models.embed_content(
+        model='text-embedding-004',
+        contents=[paragraph],
+    )
+    return embedding
