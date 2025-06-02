@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 # Local
-from ..models.general import Solution, Sequence
+from ..models.general import Solution, Sequence, Graph
 # Third Party
 from google import genai
 from google.genai import types, Client
@@ -121,3 +121,37 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
         contents=[paragraph,prompt]
     )
     return response
+
+def create_flowchart(client: genai.Client,
+                     steps: list, techniques: str):
+    """
+    Given a list of steps, this function
+    returns a Graph object containing a list of nodes
+    and edges. This function requires techniques matching
+    with the technique model, provided as a JSON str.
+    """
+    # Create a flowchart/directed graph using the sequences steps,
+    # and using appropriate branching where applicable
+    flowchart = client.models.generate_content(
+        model="gemini-2.0-flash",
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=Graph,
+            temperature=0.25
+        ),
+        contents=[techniques, steps,
+            """
+            Create a directed graph that captures the given jiu-jitsu sequence steps 
+            using branching where appropriate.
+
+            Requirements:
+            - Use only the techniques from the given list, if not possible, give error
+            - Each node should be assigned a unique node ID (e.g. 1, 2, etc.)
+            - Each node must include:
+                - `id`: the node ID
+                - `techinque`: ID and other info from the provided technique list
+            - Each edge should connect `source` to `target` using node IDs
+            - Edge note is for optionally explaining how to go from one node to the next.
+            """]
+    )
+    return flowchart

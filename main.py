@@ -57,7 +57,11 @@ def solve(
     # Using the DB service to fetch from Supabase (w/ joins for tags and cat IDs)
     techniques = get_techniques(client=supabase)
 
-    # Map steps into a light weight list of nodes and edges
+    # Use grounded steps with retrieved techniques
+    # and create a basic lightweight directed graph
+
+
+
     # Parse lists into react-flow friendly shapes
     # Pack response into model declared above and send with code
     # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
