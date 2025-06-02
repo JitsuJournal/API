@@ -4,7 +4,7 @@ from typing import Annotated
 from src.models import Reactflow
 from src.models.general import Solution
 from src.services.llm import get_gemini, create_paragraph, create_embedding
-from src.services.db import get_supabase
+from src.services.db import get_supabase, similarity_search
 # Third party
 from fastapi import FastAPI, Depends
 from google.genai import Client as LlmClient
@@ -39,12 +39,11 @@ def solve(
     embedding = create_embedding(gemini, paragraph=hypothetical.paragraph)
     vector: list[float] = embedding.embeddings[0].values
 
-    print(vector)
-
-
-    print(supabase)
     # Retrive similar records to the generated solution from Supabase
+    response = similarity_search(client=supabase, vector=vector)
+    print(response)
 
+    paragraphs: list[str] = [data['content'] for data in response.data]
 
     # Use similar records to ground generated answer (rerank if necessary)
     # Convert grounded answer into steps in a sequence
@@ -55,4 +54,4 @@ def solve(
     # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
 
 
-    return{"problem": problem, "response": str(hypothetical.paragraph)}
+    return {"problem": problem, "findings": paragraphs}
