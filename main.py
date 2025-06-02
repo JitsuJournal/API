@@ -1,14 +1,11 @@
 # System
-import os
-from dotenv import load_dotenv
+from typing import Annotated
 # Local
 from src.models import Reactflow
 from src.services.llm import get_gemini
 # Third party
 from fastapi import FastAPI, Depends
-from google import genai
-
-load_dotenv()
+from google.genai import Client
 
 # Initialize fast APi
 app = FastAPI()
@@ -20,14 +17,14 @@ async def root():
 
 # Actual endpoint for processing a given user problem
 @app.get('/solve/{problem}')#, response_model=Reactflow)
-def solve(problem: str, client=Depends(get_gemini)):
+def solve(problem: str, client: Annotated[Client, Depends(get_gemini)]):
     """
     Given a problem faced by the user in their jiu-jitsu practice,
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
     print(problem)
-    print(client)
+    print(str(client))
 
     # Generate a hypothetical solution using the user's problem
     # Retrive similar records to the generated solution from Supabase
