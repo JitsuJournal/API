@@ -12,7 +12,7 @@ load_dotenv()
 # NOTE: Can be cached with lru_cache
 # Gemini connection as a shared dependency
 # Initilize geni AI client to use Gemini
-def get_gemini() -> Client:
+def conn_gemini() -> Client:
     return genai.Client(api_key=os.getenv('GEMINI'))
 
 def create_paragraph(client: genai.Client, problem: str):

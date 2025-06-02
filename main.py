@@ -3,8 +3,8 @@ from typing import Annotated
 # Local
 from src.models import Reactflow
 from src.models.general import Solution, Sequence
-from src.services.llm import get_gemini, create_paragraph, create_embedding, ground, extract_sequences
-from src.services.db import get_supabase, similarity_search
+from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences
+from src.services.db import conn_supabase, similarity_search, get_techniques
 # Third party
 from fastapi import FastAPI, Depends
 from google.genai import Client as LlmClient
@@ -22,8 +22,8 @@ async def root():
 @app.get('/solve/{problem}')#, response_model=Reactflow)
 def solve(
         problem: str, 
-        gemini: Annotated[LlmClient, Depends(get_gemini)],
-        supabase: Annotated[DbClient, Depends(get_supabase)],
+        gemini: Annotated[LlmClient, Depends(conn_gemini)],
+        supabase: Annotated[DbClient, Depends(conn_supabase)],
     ):
     """
     Given a problem faced by the user in their jiu-jitsu practice,
@@ -53,8 +53,10 @@ def solve(
     # Convert grounded answer into steps in a sequence
     sequence: Sequence = extract_sequences(client=gemini, paragraph=grounded.paragraph, single=True).parsed
 
-
     # Load techniques into memory for passing as context in next stage
+    # Using the DB service to fetch from Supabase (w/ joins for tags and cat IDs)
+    techniques = get_techniques(client=supabase)
+
     # Map steps into a light weight list of nodes and edges
     # Parse lists into react-flow friendly shapes
     # Pack response into model declared above and send with code

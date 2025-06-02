@@ -1,5 +1,6 @@
 # System
 import os
+import json
 from dotenv import load_dotenv
 # Local
 # Third Party
@@ -7,16 +8,11 @@ from supabase import create_client, Client
 
 load_dotenv()
 
-def get_supabase()->Client:
+def conn_supabase()->Client:
     return create_client(
         supabase_url=os.environ.get("SUPABASE_URL"), 
         supabase_key=os.environ.get("SUPABASE_KEY")
     )
-
-# function for getting techniques
-# instead of storing it as a static file
-# to avoid having to recreate
-# in case we make changes upstream
 
 # function for performing similarity search
 # used to find relevant documents and ground hyde answer
@@ -33,3 +29,26 @@ def similarity_search(
         .execute()
     )
     return response
+
+# Function for returning techniques as json string
+# to use as context when creating basic graph datastructure
+# NOTE: String returned since Gemini only accepts this type
+def get_techniques(client: Client)->str:
+    response = (
+        client.table("techniques")
+        .select("id, name, description, tags (id, name), sub_id(cat_id)")
+        .execute()
+    )
+    # Convert the sub_id into actual cat_id
+    # removing the nested structure for subcategory
+    data = [
+        {**record, "sub_id": record["sub_id"]["cat_id"]}
+        for record in response.data
+    ]
+    return json.dumps(data, indent=2)
+
+
+if __name__=="__main__":
+    client = conn_supabase()
+    response = get_techniques(client)
+    print(response)
