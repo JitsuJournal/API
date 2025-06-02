@@ -2,8 +2,8 @@
 from typing import Annotated
 # Local
 from src.models import Reactflow
-from src.models.general import Solution
-from src.services.llm import get_gemini, create_paragraph, create_embedding, ground
+from src.models.general import Solution, Sequence
+from src.services.llm import get_gemini, create_paragraph, create_embedding, ground, extract_sequences
 from src.services.db import get_supabase, similarity_search
 # Third party
 from fastapi import FastAPI, Depends
@@ -50,8 +50,8 @@ def solve(
     grounded: Solution = ground(client=gemini, problem=problem, 
                       paragraphs=paragraphs, solution=hypothetical.paragraph).parsed
 
-
     # Convert grounded answer into steps in a sequence
+    sequence: Sequence = extract_sequences(client=gemini, paragraph=grounded.paragraph, single=True).parsed
 
 
     # Load techniques into memory for passing as context in next stage
@@ -61,4 +61,4 @@ def solve(
     # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
 
 
-    return {"problem": problem, "grounded": grounded.model_dump()}
+    return {"problem": problem, "grounded sequence": sequence.model_dump()}

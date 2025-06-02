@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 # Local
-from ..models.general import Solution
+from ..models.general import Solution, Sequence
 # Third Party
 from google import genai
 from google.genai import types, Client
@@ -84,3 +84,40 @@ def ground(client:genai.Client, problem:str, paragraphs: list[str], solution: st
             """]
     )
     return grounded
+
+def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
+    """
+    Given a paragraph (i.e. transcript), this function 
+    returns a list of different Sequence objects 
+    (sequence name, list of steps)
+    """
+
+    # If single, we use LLM to convert the paragraph into one sequence,
+    # preserving the paths and returning one list of steps.
+    if single:
+        prompt = """
+            Your task is to analyze the given jiu-jitsu sequence in a paragraph
+            and break it down step by step. Maintain the original tone and phrasing.
+            Keep sequence name under 40 characters.
+            """
+    else: # Else, we extract any sequence into seperate lists of steps
+        prompt = """
+            Your task is to analyze the given jiu-jitsu tutorial transcript
+            and extract any jiu-jitsu sequence, breaking them down step by step.
+            Maintain the original transcripts tone and phrasing.
+            Keep sequence names under 40 characters.
+            """
+
+    # Analyze and extract sequences from the given paragraph
+    # isolating key information to create flowcharts with
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        config=types.GenerateContentConfig(
+            system_instruction="You are a expert in brazilian gi/no-gi jiu-jitsu capable of breaking down sequences into flowchart like steps.", 
+            response_mime_type="application/json",
+            response_schema=Sequence if single else list[Sequence],
+            temperature=0.25
+        ),
+        contents=[paragraph,prompt]
+    )
+    return response
