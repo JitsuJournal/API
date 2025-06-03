@@ -4,7 +4,7 @@ import uuid
 from ..models.general import Node, Edge
 # Third Party
 
-def shape_nodes(sequenceId: int, nodes: list[Node]):
+def shape_nodes(nodes: list[Node]):
     """
     Given a list of Node objects, this function
     iterates over each item and reshapes them to fit
@@ -43,9 +43,8 @@ def shape_nodes(sequenceId: int, nodes: list[Node]):
             # (or LLM/programtically later)
             'position': {'x': 0, 'y': 0},
             
-            # Mostly carried over from Graph.Node.Techinque
+            # Mostly carried over as is from Graph.Node.Techinque
             'data': {
-                'sequence_id': sequenceId,
                 'technique_id': node.technique.id,
                 'name': node.technique.name,
                 'tags': tags,

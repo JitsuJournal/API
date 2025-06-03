@@ -64,8 +64,7 @@ def solve(
 
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
-    sequenceId = 0 # NOTE: To be swapped in client-side backend with an actual ID
-    idMap, initialNodes = shape_nodes(sequenceId, flowchart.nodes)
+    idMap, initialNodes = shape_nodes(flowchart.nodes)
     initialEdges = shape_edges(idMap, flowchart.edges)
 
     # Pack response into model declared above and send with code
