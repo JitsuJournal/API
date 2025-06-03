@@ -1,9 +1,9 @@
 # System
 import uuid
 # Local
-from ..models.general import Node, Edge
+from ..models.general import Node, Edge, Technique
 from ..models.reactflow import Node as FlowNode
-from ..models.reactflow import NodeData, Tag
+from ..models.reactflow import NodeData
 from ..models.reactflow import Edge as FlowEdge
 # Third Party
 
@@ -35,13 +35,16 @@ def shape_nodes(nodes: list[Node]):
         
         # Create and append object replacing current node
         # as initial node for react-flow
-        FlowNode(id=generatedId)
-        NodeData(
-            technique_id=node.technique.id,
+        print(node.technique.tags)
+        print(type(node.technique.tags))
+        nodeData = NodeData(
+            technique_id=str(node.technique.id),
             name=node.technique.name,
-            tags=Tag(),
-            cat_id=node.technique.cat_id)
-        
+            tags=node.technique.tags,
+            cat_id=str(node.technique.cat_id))
+        flowNode = FlowNode(id=generatedId, data=nodeData)
+        print(flowNode)
+
         initialNodes.append({
             'id': generatedId,
 
@@ -98,3 +101,122 @@ def shape_edges(idMap: dict, edges: list[Edge]) -> list[dict]:
         })
 
     return initialEdges
+
+
+if __name__=="__main__":
+    # Mock raw nodes with techinque objects in them
+    # NOTE: Tags are passed in as dicts and then converted
+    # to avoid errors related to PyDantic v2 updates
+    singleLeg = Node(id=1, technique=
+        Technique(
+            id=83,
+            name="Single Leg",
+            description="A takedown where the attacker secures one of the opponent's legs and uses different finishes like running the pipe, lifting, or switching to a double-leg.",
+            tags=[
+                {"id": 22, "name": "wrestling"},
+            ],
+            cat_id=3
+        )
+    )
+    fullGuard = Node(id=2, technique=
+        Technique(
+            id=16,
+            name="Full Guard",
+            description="Maintaining an open guard position with legs not locked, using feet, knees, and grips to control distance and create opportunities for sweeps and submissions.",
+            tags=[
+                {"id": 3, "name": "bottom"},
+                {"id": 4, "name": "open"}
+            ],
+            cat_id=1
+        )
+    )
+    halfGuard = Node(id=3, technique=
+        Technique(
+            id=20,
+            name="Half Guard",
+            description="Controlling one of the opponent's legs between your legs, focusing on creating space, sweeping, or transitioning to full guard or a better position.",
+            tags=[
+                {"id": 3, "name": "bottom"}
+            ],
+            cat_id=1
+        )
+    )
+    ankleLock = Node(id=4, technique=
+        Technique(
+            id=45,
+            name="Ankle Lock",
+            description="A leg lock that hyperextends the ankle joint, typically applied by grasping the ankle and applying pressure with the forearm.",
+            tags=[
+                {"id": 9, "name": "ankle"}
+            ],
+            cat_id=2
+        )
+    )
+    omoplata = Node(id=5, technique=
+        Technique(
+            id=42,
+            name="Omoplata",
+            description="A shoulder lock that uses the legs to apply pressure on the opponent's shoulder joint, often set up from guard positions.",
+            tags=[
+                {"id": 11, "name": "shoulder"}
+            ],
+            cat_id=2
+        )
+    )
+    kneeBar = Node(id=6, technique=
+        Technique(
+            id=43,
+            name="Knee Bar",
+            description="A leg lock that hyperextends the knee joint, applied by trapping the opponent's leg between your legs and pulling back on the heel.",
+            tags=[
+                {"id": 13, "name": "knee"}
+            ],
+            cat_id=2
+        )
+    )
+    scissorSweep = Node(id=7, technique=
+        Technique(
+            id=48,
+            name="Scissor Sweep",
+            description="A sweep from guard where the legs scissor to off-balance and flip the opponent, transitioning to mount.",
+            tags=[
+                {"id": 3, "name": "bottom"}
+            ],
+            cat_id=3
+        )
+    )
+    sideControl = Node(id=8, technique=
+        Technique(
+            id=9,
+            name="Standard Side Control",
+            description="Controlling the opponent from the side while pinning their shoulders and hips, maintaining pressure with chest-to-chest contact.",
+            tags=[
+                {"id": 2, "name": "seated"},
+                {"id": 1, "name": "top"}
+            ],
+            cat_id=1
+        )
+    )
+    armBar = Node(id=9, technique=
+        Technique(
+            id=39,
+            name="Arm Bar",
+            description="A joint lock that hyperextends the elbow joint, typically applied by trapping the opponent's arm between your legs and pulling on the wrist while pushing with the hips.",
+            tags=[
+                {"id": 12, "name": "elbow"}
+            ],
+            cat_id=2
+        )
+    )
+
+
+    nodes: list[Node] = [singleLeg, fullGuard, halfGuard, ankleLock, 
+             omoplata, kneeBar, scissorSweep, sideControl, armBar]
+    
+    print(nodes)
+
+
+    # Mock raw edges
+
+
+    # Parse and get output to verify working

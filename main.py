@@ -66,13 +66,13 @@ def solve(
 
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
-    idMap, initialNodes = shape_nodes(flowchart.nodes)
-    initialEdges = shape_edges(idMap, flowchart.edges)
+    #idMap, initialNodes = shape_nodes(flowchart.nodes)
+    #initialEdges = shape_edges(idMap, flowchart.edges)
 
     # Pack response into model declared above and send with code
     
 
-    return {"problem": problem, "nodes": initialNodes, "edges": initialEdges}
+    return {"problem": problem, 'flowchart': flowchart.model_dump()}#"nodes": initialNodes, "edges": initialEdges}
 
 
 if __name__=="__main__":
