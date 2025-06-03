@@ -2,9 +2,10 @@
 from typing import Annotated
 # Local
 from src.models import Reactflow
-from src.models.general import Solution, Sequence
-from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences
+from src.models.general import Solution, Sequence, Graph
+from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
+from src.utils.general import shape_nodes, shape_edges
 # Third party
 from fastapi import FastAPI, Depends
 from google.genai import Client as LlmClient
@@ -41,9 +42,9 @@ def solve(
 
     # Retrive similar records to the generated solution from Supabase
     # NOTE: Using default match threshold and count for searching
-    response = similarity_search(client=supabase, vector=vector)
+    similar = similarity_search(client=supabase, vector=vector)
 
-    paragraphs: list[str] = [data['content'] for data in response.data]
+    paragraphs: list[str] = [data['content'] for data in similar.data]
 
     # Use top-k records in similar
     # to gound the hypothetical result
@@ -59,12 +60,14 @@ def solve(
 
     # Use grounded steps with retrieved techniques
     # and create a basic lightweight directed graph
+    flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
+
+    # Parse nodes and edges into react-flow friendly shapes
 
 
-
-    # Parse lists into react-flow friendly shapes
     # Pack response into model declared above and send with code
     # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
+
 
 
     return {"problem": problem, "grounded sequence": sequence.model_dump()}
