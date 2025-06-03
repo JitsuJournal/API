@@ -35,35 +35,15 @@ def shape_nodes(nodes: list[Node]):
         
         # Create and append object replacing current node
         # as initial node for react-flow
-        print(node.technique.tags)
-        print(type(node.technique.tags))
-        nodeData = NodeData(
-            technique_id=str(node.technique.id),
-            name=node.technique.name,
-            tags=node.technique.tags,
-            cat_id=str(node.technique.cat_id))
-        flowNode = FlowNode(id=generatedId, data=nodeData)
-        print(flowNode)
-
-        initialNodes.append({
-            'id': generatedId,
-
-            # Constant for custom node rendering
-            'type': 'technique',
-            
-            # - Placeholder 0,0 for position, 
-            # can be added with autolayout 
-            # (or LLM/programtically later)
-            'position': {'x': 0, 'y': 0},
-            
-            # Mostly carried over as is from Graph.Node.Techinque
-            'data': {
-                'technique_id': node.technique.id,
-                'name': node.technique.name,
-                'tags': tags,
-                'cat_id': node.technique.cat_id
-            }
-        })
+        flowNode = FlowNode(id=generatedId, data=
+            NodeData(
+                technique_id=node.technique.id,
+                name=node.technique.name,
+                tags=tags,
+                cat_id=node.technique.cat_id
+            )
+        )
+        initialNodes.append(flowNode)
 
     return idMap, initialNodes
 
@@ -209,14 +189,14 @@ if __name__=="__main__":
         )
     )
 
-
-    nodes: list[Node] = [singleLeg, fullGuard, halfGuard, ankleLock, 
+    rawNodes: list[Node] = [singleLeg, fullGuard, halfGuard, ankleLock, 
              omoplata, kneeBar, scissorSweep, sideControl, armBar]
-    
-    print(nodes)
 
+    # Test reshaping the nodes into PyDantic objects
+    idMap, initialNodes = shape_nodes(rawNodes)
+    print(initialNodes)
 
     # Mock raw edges
 
 
-    # Parse and get output to verify working
+    # Test reshaping the edges into PyDantic objects

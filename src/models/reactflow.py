@@ -5,10 +5,10 @@ class Tag(BaseModel):
     name: str
 
 class NodeData(BaseModel):
-    technique_id:  str
+    technique_id:  int
     name: str
     tags: list[Tag]
-    cat_id: str
+    cat_id: int
 
 class Node(BaseModel):
     id: str
