@@ -63,11 +63,12 @@ def solve(
     flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
 
     # Parse nodes and edges into react-flow friendly shapes
-
+    # Swap ID's to UUID's and maintain a map to preserve relations
+    sequenceId = 0 # NOTE: To be swapped in client-side backend with an actual ID
+    idMap, initialNodes = shape_nodes(sequenceId, flowchart.nodes)
+    initialEdges = shape_edges(idMap, flowchart.edges)
 
     # Pack response into model declared above and send with code
-    # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes
+    # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes)
 
-
-
-    return {"problem": problem, "grounded sequence": sequence.model_dump()}
+    return {"problem": problem, "nodes": initialNodes, "edges": initialEdges}
