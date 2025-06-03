@@ -8,6 +8,7 @@ from src.services.llm import conn_gemini, create_paragraph, create_embedding, gr
 from src.services.db import conn_supabase, similarity_search, get_techniques
 from src.utils.general import shape_nodes, shape_edges
 # Third party
+import uvicorn
 from fastapi import FastAPI, Depends
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
@@ -72,3 +73,7 @@ def solve(
     
 
     return {"problem": problem, "nodes": initialNodes, "edges": initialEdges}
+
+
+if __name__=="__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
