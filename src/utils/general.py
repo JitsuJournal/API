@@ -193,8 +193,8 @@ if __name__=="__main__":
              omoplata, kneeBar, scissorSweep, sideControl, armBar]
 
     # Test reshaping the nodes into PyDantic objects
-    #idMap, initialNodes = shape_nodes(rawNodes)
-    #print(initialNodes)
+    idMap, initialNodes = shape_nodes(rawNodes)
+    print(initialNodes)
 
     # Mock raw edges (ensuring only edges with source id in idMap/rawNodes exists below)
     e1 = Edge(id=1, source_id=1, target_id=2, note="Establish a strong single leg X-guard from open guard")
@@ -203,11 +203,12 @@ if __name__=="__main__":
     e4 = Edge(id=4, source_id=4, target_id=5, note="If the opponent defends the Achilles lock, transition to an inside heel hook")
     e5 = Edge(id=5, source_id=5, target_id=6, note="If the opponent's hips come up or they drive forward, shift your hips to transition to the saddle position")
     e6 = Edge(id=6, source_id=5, target_id=7, note="If the opponent defends the initial heel hook, re-entangle")
-    e7 = Edge(id=7, source_id=7, target_id=11, note="Look for follow-up attacks on the same leg, such as a Toe Hold")
-    e8 = Edge(id=8, source_id=7, target_id=8, note="sweep them to a dominant top position")
-    e9 = Edge(id=9, source_id=8, target_id=9, note="From a dominant top position, re-attack the legs")
+    e7 = Edge(id=8, source_id=7, target_id=8, note="sweep them to a dominant top position")
+    e8 = Edge(id=9, source_id=8, target_id=9, note="From a dominant top position, re-attack the legs")
 
-    rawEdges = [e1, e2, e3, e4, e5, e6, e7, e8, e9]
+    rawEdges = [e1, e2, e3, e4, e5, e6, e7, e8]
 
-    print(rawEdges)
+
     # Test reshaping the edges into PyDantic objects
+    reshapedEdges = shape_edges(idMap, rawEdges)
+    print(reshapedEdges)
