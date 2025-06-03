@@ -3,6 +3,7 @@ import uuid
 # Local
 from ..models.general import Node, Edge
 from ..models.reactflow import Node as FlowNode
+from ..models.reactflow import NodeData
 from ..models.reactflow import Edge as FlowEdge
 # Third Party
 
@@ -34,6 +35,8 @@ def shape_nodes(nodes: list[Node]):
         
         # Create and append object replacing current node
         # as initial node for react-flow
+        FlowNode(id=generatedId)
+        NodeData()
         initialNodes.append({
             'id': generatedId,
 

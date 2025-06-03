@@ -5,7 +5,6 @@ class Tag(BaseModel):
     name: str
 
 class NodeData(BaseModel):
-    sequence_id: str
     technique_id:  str
     name: str
     tags: Tag
