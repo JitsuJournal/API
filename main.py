@@ -1,3 +1,4 @@
+# TODO: Handle any errors in the middle, passing msgs w/ appropriate error codes)
 # System
 from typing import Annotated
 # Local
@@ -68,6 +69,6 @@ def solve(
     initialEdges = shape_edges(idMap, flowchart.edges)
 
     # Pack response into model declared above and send with code
-    # NOTE: Handle any errors in the middle, passing msgs w/ appropriate error codes)
+    
 
     return {"problem": problem, "nodes": initialNodes, "edges": initialEdges}
