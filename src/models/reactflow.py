@@ -7,7 +7,7 @@ class Tag(BaseModel):
 class NodeData(BaseModel):
     technique_id:  str
     name: str
-    tags: Tag
+    tags: list[Tag]
     cat_id: str
 
 class Node(BaseModel):
