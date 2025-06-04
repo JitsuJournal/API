@@ -67,18 +67,12 @@ def shape_edges(idMap: dict, edges: list[Edge]) -> list[dict]:
         # - xy-edge__sourceID-sourceHandle_targetID-targetHandle
         generatedId = f"xy-edge__{sourceId}-b_{targetId}-a"
 
-        initialEdges.append({
-            'id': generatedId,
-            'type': 'note',
-            'source': sourceId,
-            'target': targetId,
 
-            # Set fixed source/target handles for all edges
-            'sourceHandle': 'b', # Bottom
-            'targetHandle': 'a', # Top
-            # Carry over note from Graph.Edges.note
-            'data': {'note': edge.note}
-        })
+        flowEdge = FlowEdge(
+            id=generatedId, source=sourceId, target=targetId, 
+            data={'note': edge.note}
+        )
+        initialEdges.append(flowEdge)
 
     return initialEdges
 
