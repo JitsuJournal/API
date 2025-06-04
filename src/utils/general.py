@@ -4,7 +4,7 @@ import uuid
 from ..models.general import Node, Edge, Technique
 from ..models.reactflow import Node as FlowNode
 from ..models.reactflow import NodeData
-from ..models.reactflow import Edge as FlowEdge
+from ..models.reactflow import Edge as FlowEdge, Reactflow
 # Third Party
 
 def shape_nodes(nodes: list[Node]):
@@ -188,7 +188,7 @@ if __name__=="__main__":
 
     # Test reshaping the nodes into PyDantic objects
     idMap, initialNodes = shape_nodes(rawNodes)
-    print(initialNodes)
+    #print(initialNodes)
 
     # Mock raw edges (ensuring only edges with source id in idMap/rawNodes exists below)
     e1 = Edge(id=1, source_id=1, target_id=2, note="Establish a strong single leg X-guard from open guard")
@@ -202,7 +202,11 @@ if __name__=="__main__":
 
     rawEdges = [e1, e2, e3, e4, e5, e6, e7, e8]
 
-
     # Test reshaping the edges into PyDantic objects
-    reshapedEdges = shape_edges(idMap, rawEdges)
-    print(reshapedEdges)
+    initialEdges = shape_edges(idMap, rawEdges)
+
+
+    # Create the react-flow object
+    # and test dumping it to see how the user would receive
+    graph = Reactflow(initialNodes=initialNodes,initialEdges=initialEdges)
+    print(graph.model_dump())
