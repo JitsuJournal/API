@@ -22,7 +22,7 @@ async def root():
     return{"message": "Hello world"}
 
 # Actual endpoint for processing a given user problem
-@app.get('/solve/{problem}')#, response_model=Reactflow)
+@app.get('/solve/{problem}', response_model=Reactflow)
 def solve(
         problem: str, 
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
@@ -66,13 +66,17 @@ def solve(
 
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
-    #idMap, initialNodes = shape_nodes(flowchart.nodes)
-    #initialEdges = shape_edges(idMap, flowchart.edges)
+    idMap, reshapedNodes = shape_nodes(flowchart.nodes)
+    reshapedEdges = shape_edges(idMap, flowchart.edges)
 
-    # Pack response into model declared above and send with code
-    
+    # Pack response into ReactFlow model, ensuring type safety
+    # use the sequences name as the graph name
+    jitsujournal = Reactflow(name=sequence.name, 
+                             initialNodes=reshapedNodes, initialEdges=reshapedEdges)
 
-    return {"problem": problem, 'flowchart': flowchart.model_dump()}#"nodes": initialNodes, "edges": initialEdges}
+    # Return jitsujournal friendly graph to the user
+    # FastAPI automatically dumps the model as JSON
+    return jitsujournal
 
 
 if __name__=="__main__":
