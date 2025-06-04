@@ -7,7 +7,7 @@ from ..models.reactflow import NodeData
 from ..models.reactflow import Edge as FlowEdge, Reactflow
 # Third Party
 
-def shape_nodes(nodes: list[Node]):
+def shape_nodes(nodes: list[Node]) -> tuple[dict[int,str], list[FlowNode]]:
     """
     Given a list of Node objects, this function
     iterates over each item and reshapes them to fit
@@ -47,7 +47,7 @@ def shape_nodes(nodes: list[Node]):
 
     return idMap, initialNodes
 
-def shape_edges(idMap: dict, edges: list[Edge]) -> list[dict]:
+def shape_edges(idMap: dict, edges: list[Edge]) -> list[FlowEdge]:
     """
     Given a list of Edge objects, this function
     iterates over each item and reshapes them to fit
