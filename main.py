@@ -12,9 +12,23 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
+# For cross origin resource sharing
+from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize fast APi
 app = FastAPI()
+
+
+origins = [
+    # TODO: Include production front-end URL
+    "http://localhost.tiangolo.com",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    # allow_methods=["*"], NOTE: Default is GET
+)
 
 # Placeholder endpoint for webservice root
 @app.get('/')
