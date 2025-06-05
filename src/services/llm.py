@@ -111,7 +111,7 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
     # Analyze and extract sequences from the given paragraph
     # isolating key information to create flowcharts with
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
             system_instruction="You are a expert in brazilian gi/no-gi jiu-jitsu capable of breaking down sequences into flowchart like steps.", 
             response_mime_type="application/json",
@@ -133,7 +133,7 @@ def create_flowchart(client: genai.Client,
     # Create a flowchart/directed graph using the sequences steps,
     # and using appropriate branching where applicable
     flowchart = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,

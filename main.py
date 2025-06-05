@@ -21,13 +21,14 @@ app = FastAPI()
 
 origins = [
     # TODO: Include production front-end URL
-    "http://localhost.tiangolo.com",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     # allow_methods=["*"], NOTE: Default is GET
+    allow_headers=["*"],
 )
 
 # Placeholder endpoint for webservice root
