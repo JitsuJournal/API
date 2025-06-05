@@ -48,40 +48,84 @@ def solve(
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
-    # Create a hypothetical solution paragraph using the users problem
-    hypothetical: Solution = create_paragraph(gemini, problem).parsed
+    try:
+        # Create a hypothetical solution paragraph using the users problem
+        hypothetical: Solution = create_paragraph(gemini, problem).parsed
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to create hyde. Error: {str(e)}'
+        )
 
     # Create embedding using the hypothetical solution
     # Used for searching tutorials with similar content
-    embedding = create_embedding(gemini, paragraph=hypothetical.paragraph)
-    vector: list[float] = embedding.embeddings[0].values
+    try:
+        embedding = create_embedding(gemini, paragraph=hypothetical.paragraph)
+        vector: list[float] = embedding.embeddings[0].values
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to embedd. Error: {str(e)}'
+        )
 
-    # Retrive similar records to the generated solution from Supabase
-    # NOTE: Using default match threshold and count for searching
-    similar = similarity_search(client=supabase, vector=vector)
+    try:
+        # Retrive similar records to the generated solution from Supabase
+        # NOTE: Using default match threshold and count for searching
+        similar = similarity_search(client=supabase, vector=vector)
+        paragraphs: list[str] = [data['content'] for data in similar.data]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to perform vector search. Error: {str(e)}'
+        )
 
-    paragraphs: list[str] = [data['content'] for data in similar.data]
 
     # Use top-k records in similar
     # to gound the hypothetical result
-    grounded: Solution = ground(client=gemini, problem=problem, 
-                      paragraphs=paragraphs, solution=hypothetical.paragraph).parsed
+    try:
+        grounded: Solution = ground(client=gemini, problem=problem, 
+                        paragraphs=paragraphs, solution=hypothetical.paragraph).parsed
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to ground generated solution. Error: {str(e)}'
+        )
+
 
     # Convert grounded answer into steps in a sequence
-    sequence: Sequence = extract_sequences(client=gemini, paragraph=grounded.paragraph, single=True).parsed
+    try:
+        sequence: Sequence = extract_sequences(client=gemini, paragraph=grounded.paragraph, single=True).parsed
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to extract steps from generated solution. Error: {str(e)}'
+        )
 
-    # Load techniques into memory for passing as context in next stage
-    # Using the DB service to fetch from Supabase (w/ joins for tags and cat IDs)
-    techniques = get_techniques(client=supabase)
 
-    # Use grounded steps with retrieved techniques
-    # and create a basic lightweight directed graph
-    flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
+    try:
+        # Load techniques into memory for passing as context in next stage
+        # Using the DB service to fetch from Supabase (w/ joins for tags and cat IDs)
+        techniques = get_techniques(client=supabase)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to get techniques from DB. Error: {str(e)}'
+        )
+
+    try:
+        # Use grounded steps with retrieved techniques
+        # and create a basic lightweight directed graph
+        flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to create flowchart using extracted steps. Error: {str(e)}'
+        )
 
     if flowchart==None:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail='Failed to create flowchart.'
+            detail='Failed to create flowchart, null response.'
         )
     elif flowchart.nodes==None or len(flowchart.nodes)<=0:
         raise HTTPException(
