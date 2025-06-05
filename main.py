@@ -96,13 +96,25 @@ def solve(
 
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
-    idMap, reshapedNodes = shape_nodes(flowchart.nodes)
-    reshapedEdges = shape_edges(idMap, flowchart.edges)
+    try:
+        idMap, reshapedNodes = shape_nodes(flowchart.nodes)
+        reshapedEdges = shape_edges(idMap, flowchart.edges)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to reformat the nodes and edges. Error: {str(e)}'
+        )
 
     # Pack response into ReactFlow model, ensuring type safety
     # use the sequences name as the graph name
-    jitsujournal = Reactflow(name=sequence.name, 
-                             initialNodes=reshapedNodes, initialEdges=reshapedEdges)
+    try:
+        jitsujournal = Reactflow(name=sequence.name, 
+                                initialNodes=reshapedNodes, initialEdges=reshapedEdges)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to parse output into ReactFlow model. Error: {str(e)}'
+        )
 
     # Return jitsujournal friendly graph to the user
     # FastAPI automatically dumps the model as JSON
