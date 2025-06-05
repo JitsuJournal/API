@@ -9,7 +9,7 @@ from src.services.db import conn_supabase, similarity_search, get_techniques
 from src.utils.general import shape_nodes, shape_edges
 # Third party
 import uvicorn
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException, status
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
 # For cross origin resource sharing
@@ -48,7 +48,6 @@ def solve(
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
-
     # Create a hypothetical solution paragraph using the users problem
     hypothetical: Solution = create_paragraph(gemini, problem).parsed
 
@@ -78,6 +77,22 @@ def solve(
     # Use grounded steps with retrieved techniques
     # and create a basic lightweight directed graph
     flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
+
+    if flowchart==None:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail='Failed to create flowchart.'
+        )
+    elif flowchart.nodes==None or len(flowchart.nodes)<=0:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail='No nodes generated.'
+        )
+    elif flowchart.edges==None or len(flowchart.edges)<=0:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail='No edges generated.'
+        )
 
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
