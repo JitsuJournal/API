@@ -34,9 +34,29 @@ app.add_middleware(
 # Placeholder endpoint for webservice root
 @app.get('/')
 async def root():
-    return{"message": "Hello world"}
+    return {"message": "Hello world"}
+
+
+@app.get('/test')
+def test():
+    # Use an existing sequence and pull its data here
+    # ensure it fits the reactflow output style
+    # and return it to the user
+    # this is useful when doing multiple queries
+    # to check if the endpoint works and how positioning,
+    # redirecting, and other things would work
+
+    # NOTE/TODO: It's important we don't end up
+    # recreating nodes and edges,
+    # so we need to disable the chunk of code where we actually 
+    # create nodes/edge
+    # or we need to delete
+    return {"message": "Testing endpoint to pipe data into generateSolution"}
+
 
 # Actual endpoint for processing a given user problem
+# NOTE/TODO: Convert to a PUT request to ensure we can send large length
+# problems with any special character as required without breaking URL
 @app.get('/solve/{problem}', response_model=Reactflow)
 def solve(
         problem: str, 
