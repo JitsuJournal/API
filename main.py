@@ -135,7 +135,7 @@ def test():
     # Pack response into ReactFlow model, ensuring type safety
     # use the sequences name as the graph name
     try:
-        jitsujournal = Reactflow(name='Sample/Test Sequence', 
+        jitsujournal = Reactflow(name='Sample Side Sequence', 
                                 initialNodes=reshapedNodes, initialEdges=reshapedEdges)
     except Exception as e:
         raise HTTPException(
