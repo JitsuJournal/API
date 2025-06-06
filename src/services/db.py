@@ -46,3 +46,13 @@ def get_techniques(client: Client)->str:
         for record in response.data
     ]
     return json.dumps(data)
+
+
+if __name__=="__main__":
+    client=conn_supabase()
+    techniques = get_techniques(client)
+    
+    # get nodes and edges from sequence 581
+    # pack them into nodes/edges
+
+    # move variables into main.py's test endpoint
