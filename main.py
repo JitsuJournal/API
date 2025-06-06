@@ -2,7 +2,7 @@
 # System
 from typing import Annotated
 # Local
-from src.models import Reactflow
+from src.models.reactflow import Reactflow, Node, NodeData, Edge # Last 3 used for test
 from src.models.general import Solution, Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
@@ -39,18 +39,68 @@ async def root():
 
 @app.get('/test')
 def test():
-    # Use an existing sequence and pull its data here
-    # ensure it fits the reactflow output style
-    # and return it to the user
-    # this is useful when doing multiple queries
-    # to check if the endpoint works and how positioning,
-    # redirecting, and other things would work
+    """
+    Endpoint that returns ReactFlow friendly nodes
+    and edges from Sequence 581. Useful for querying
+    multiple times to set positions, redirect,
+    or test any other feature in the frontend/client side.
+    """
+    node_a = Node(
+        id='269f01de-1574-4896-ba3b-9372e07bbc7c', 
+        data=NodeData(
+            technique_id=34,name='Triangle', 
+            tags=[{'id': 10, 'name': 'artery'}],
+            cat_id=2
+        )
+    )
+    node_b = Node(
+        id='3a2913de-59d6-4ac9-a957-eeb329b7b74d', 
+        data=NodeData(
+            technique_id=9,name='Standard Side Control', 
+            tags=[{'id': 2, 'name': 'seated'},{'id': 1, 'name': 'top'}],
+            cat_id=1
+        )
+    )
+    node_c = Node(
+        id='b49ffa65-03e7-411d-be7a-6bbaf06543b9', 
+        data=NodeData(
+            technique_id=3,name='Low Mount', 
+            tags=[{'id': 1, 'name': 'top'}],
+            cat_id=1
+        )
+    )
+    node_d = Node(
+        id='c0c64f73-a9a4-43f9-ad85-37b5a3b57cec', 
+        data=NodeData(
+            technique_id=41,name='Americana',
+            tags=[{'id': 11, 'name': 'shoulder'}],
+            cat_id=2
+        )
+    )
+    node_e = Node(
+        id='a766adaa-2f18-4285-9b02-94d02e71d63d', 
+        data=NodeData(
+            technique_id=39,name='Arm Bar', 
+            tags=[{'id': 12, 'name': 'elbow'}],
+            cat_id=2
+        )
+    )
 
-    # NOTE/TODO: It's important we don't end up
-    # recreating nodes and edges,
-    # so we need to disable the chunk of code where we actually 
-    # create nodes/edge
-    # or we need to delete
+    initialNodes: list[Node] = [node_a, node_b, node_c, node_d, node_e]
+    print(initialNodes)
+
+
+    # Setup edges
+
+
+
+
+
+    # Initialize ReactFlow object
+    
+
+
+
     return {"message": "Testing endpoint to pipe data into generateSolution"}
 
 
