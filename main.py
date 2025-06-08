@@ -2,12 +2,10 @@
 # System
 from typing import Annotated
 # Local
-from src.models import Reactflow
 from src.models.general import Solution, Sequence, Graph
 from src.models.general import Node, Edge # Models using for test endpoint
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
-#from src.utils.general import shape_nodes, shape_edges
 # Third party
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -252,34 +250,8 @@ def solve(
             detail='No edges generated.'
         )
 
-    """
-    # Parse nodes and edges into react-flow friendly shapes
-    # Swap ID's to UUID's and maintain a map to preserve relations
-    try:
-        idMap, reshapedNodes = shape_nodes(flowchart.nodes)
-        reshapedEdges = shape_edges(idMap, flowchart.edges)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail=f'Failed to reformat the nodes and edges. Error: {str(e)}'
-        )
-
-    # Pack response into ReactFlow model, ensuring type safety
-    # use the sequences name as the graph name
-    try:
-        jitsujournal = Reactflow(name=sequence.name, 
-                                initialNodes=reshapedNodes, initialEdges=reshapedEdges)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail=f'Failed to parse output into ReactFlow model. Error: {str(e)}'
-        )
-
-    # Return jitsujournal friendly graph to the user
+    # Return generated directed graph/flowchart to the user
     # FastAPI automatically dumps the model as JSON
-    return jitsujournal
-    """
-
     return flowchart
 
 
