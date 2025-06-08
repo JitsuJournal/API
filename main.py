@@ -4,10 +4,10 @@ from typing import Annotated
 # Local
 from src.models import Reactflow
 from src.models.general import Solution, Sequence, Graph
-from src.models.general import Node, Technique, Edge # Models using for test endpoint
+from src.models.general import Node, Edge # Models using for test endpoint
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
-from src.utils.general import shape_nodes, shape_edges
+#from src.utils.general import shape_nodes, shape_edges
 # Third party
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -37,15 +37,15 @@ app.add_middleware(
 async def root():
     return {"message": "Hello world"}
 
-
+"""
 @app.get('/test', response_model=Reactflow)
 def test():
-    """
+    # --- NOTE: use " instead of -
     Endpoint that returns ReactFlow friendly nodes
     and edges from Sequence 581. Useful for querying
     multiple times to set positions, redirect,
     or test any other feature in the frontend/client side.
-    """
+    # ---
     # Define constant nodes based on sequence 581
     node_a = Node(
         id=1,
@@ -146,12 +146,12 @@ def test():
     # Return jitsujournal friendly graph to the user
     # FastAPI automatically dumps the model as JSON
     return jitsujournal
-
+"""
 
 # Actual endpoint for processing a given user problem
 # NOTE/TODO: Convert to a PUT request to ensure we can send large length
 # problems with any special character as required without breaking URL
-@app.get('/solve/{problem}', response_model=Reactflow)
+@app.get('/solve/{problem}', response_model=Graph)#, response_model=Reactflow)
 def solve(
         problem: str, 
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
@@ -252,6 +252,7 @@ def solve(
             detail='No edges generated.'
         )
 
+    """
     # Parse nodes and edges into react-flow friendly shapes
     # Swap ID's to UUID's and maintain a map to preserve relations
     try:
@@ -277,6 +278,9 @@ def solve(
     # Return jitsujournal friendly graph to the user
     # FastAPI automatically dumps the model as JSON
     return jitsujournal
+    """
+
+    return flowchart
 
 
 if __name__=="__main__":
