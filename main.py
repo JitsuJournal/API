@@ -3,7 +3,7 @@
 from typing import Annotated
 # Local
 from src.models.general import Solution, Sequence, Graph
-from src.models.general import Node, Edge # Models using for test endpoint
+from src.models.general import Node, Edge # Models used for old test endpoint
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
 # Third party
@@ -145,6 +145,131 @@ def test():
     # FastAPI automatically dumps the model as JSON
     return jitsujournal
 """
+
+@app.get('/test', response_model=Graph)
+def test():
+    """
+    Endpoint that returns a basic list of nodes with technique ID
+    and edges that reference the nodes as source/target using ID's,
+    and finally also contains optional notes describing transitions
+    in more detail.
+    """
+    data = {
+        "nodes": [
+            {"id": 1,"technique_id": 87},
+            {"id": 2,"technique_id": 84},
+            {"id": 3,"technique_id": 83},
+            {"id": 4,"technique_id": 77},
+            {"id": 5,"technique_id": 9},
+            {"id": 6,"technique_id": 19},
+            {"id": 7,"technique_id": 39},
+            {"id": 8,"technique_id": 41},
+            {"id": 9,"technique_id": 40},
+            {"id": 10,"technique_id": 9},
+            {"id": 11,"technique_id": 40},
+            {"id": 12,"technique_id": 25},
+            {"id": 13,"technique_id": 32},
+            {"id": 14,"technique_id": 38}
+        ],
+        "edges": [
+            {
+            "id": 1,
+            "source_id": 1,"target_id": 2,
+            "note": "Execute Double Leg Takedown"
+            },
+            {
+            "id": 2,
+            "source_id": 1,
+            "target_id": 4,
+            "note": "Snap Down"
+            },
+            {
+            "id": 3,
+            "source_id": 2,
+            "target_id": 5,
+            "note": "Land in Side Control"
+            },
+            {
+            "id": 4,
+            "source_id": 2,
+            "target_id": 3,
+            "note": "Transition to Single Leg Takedown"
+            },
+            {
+            "id": 5,
+            "source_id": 3,
+            "target_id": 6,
+            "note": "Land in Half Guard"
+            },
+            {
+            "id": 6,
+            "source_id": 4,
+            "target_id": 12,
+            "note": "Transition to the back"
+            },
+            {
+            "id": 7,
+            "source_id": 4,
+            "target_id": 14,
+            "note": "Secure a Guillotine choke"
+            },
+            {
+            "id": 8,
+            "source_id": 5,
+            "target_id": 7,
+            "note": "Transition to Mount and attack with an Armbar"
+            },
+            {
+            "id": 9,
+            "source_id": 5,
+            "target_id": 8,
+            "note": "Isolate an arm for an Americana"
+            },
+            {
+            "id": 10,
+            "source_id": 5,
+            "target_id": 9,
+            "note": "Attack a Kimura"
+            },
+            {
+            "id": 11,
+            "source_id": 6,
+            "target_id": 10,
+            "note": "Pass to Side Control"
+            },
+            {
+            "id": 12,
+            "source_id": 6,
+            "target_id": 11,
+            "note": "Attack a Kimura"
+            },
+            {
+            "id": 13,
+            "source_id": 10,
+            "target_id": 7,
+            "note": "Transition to Mount and attack with an Armbar"
+            },
+            {
+            "id": 14,
+            "source_id": 10,
+            "target_id": 8,
+            "note": "Isolate an arm for an Americana"
+            },
+            {
+            "id": 15,
+            "source_id": 10,
+            "target_id": 9,
+            "note": "Attack a Kimura"
+            },
+            {
+            "id": 16,
+            "source_id": 12,
+            "target_id": 13,
+            "note": "Rear Naked Choke"
+            }
+        ]
+    }
+    return Graph(**data)
 
 # Actual endpoint for processing a given user problem
 # NOTE/TODO: Convert to a PUT request to ensure we can send large length
