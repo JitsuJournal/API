@@ -170,10 +170,6 @@ def test():
             "technique_id": 32
             },
             {
-            "id": 4,
-            "technique_id": 39
-            },
-            {
             "id": 5,
             "technique_id": 25
             },
