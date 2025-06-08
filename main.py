@@ -155,118 +155,57 @@ def test():
     in more detail.
     """
     data = {
-        "name": "AI Test Sequence",
+        "name": "Mount Attack Sequence",
         "nodes": [
-            {"id": 1,"technique_id": 87},
-            {"id": 2,"technique_id": 84},
-            {"id": 3,"technique_id": 83},
-            {"id": 4,"technique_id": 77},
-            {"id": 5,"technique_id": 9},
-            {"id": 6,"technique_id": 19},
-            {"id": 7,"technique_id": 39},
-            {"id": 8,"technique_id": 41},
-            {"id": 9,"technique_id": 40},
-            {"id": 10,"technique_id": 9},
-            {"id": 11,"technique_id": 40},
-            {"id": 12,"technique_id": 25},
-            {"id": 13,"technique_id": 32},
-            {"id": 14,"technique_id": 38}
+            {
+            "id": 1,
+            "technique_id": 3
+            },
+            {
+            "id": 2,
+            "technique_id": 31
+            },
+            {
+            "id": 3,
+            "technique_id": 32
+            },
+            {
+            "id": 4,
+            "technique_id": 39
+            },
+            {
+            "id": 5,
+            "technique_id": 25
+            },
+            {
+            "id": 6,
+            "technique_id": 32
+            }
         ],
         "edges": [
             {
             "id": 1,
-            "source_id": 1,"target_id": 2,
-            "note": "Execute Double Leg Takedown"
+            "source_id": 1,
+            "target_id": 2,
+            "note": "Option 1: Cross-Collar Choke"
             },
             {
             "id": 2,
             "source_id": 1,
-            "target_id": 4,
-            "note": "Snap Down"
+            "target_id": 3,
+            "note": "If opponent defends choke by pushing your arm, transition to armbar"
             },
             {
             "id": 3,
-            "source_id": 2,
+            "source_id": 1,
             "target_id": 5,
-            "note": "Land in Side Control"
+            "note": "If opponent turns away from armbar, take their back"
             },
             {
             "id": 4,
-            "source_id": 2,
-            "target_id": 3,
-            "note": "Transition to Single Leg Takedown"
-            },
-            {
-            "id": 5,
-            "source_id": 3,
+            "source_id": 5,
             "target_id": 6,
-            "note": "Land in Half Guard"
-            },
-            {
-            "id": 6,
-            "source_id": 4,
-            "target_id": 12,
-            "note": "Transition to the back"
-            },
-            {
-            "id": 7,
-            "source_id": 4,
-            "target_id": 14,
-            "note": "Secure a Guillotine choke"
-            },
-            {
-            "id": 8,
-            "source_id": 5,
-            "target_id": 7,
-            "note": "Transition to Mount and attack with an Armbar"
-            },
-            {
-            "id": 9,
-            "source_id": 5,
-            "target_id": 8,
-            "note": "Isolate an arm for an Americana"
-            },
-            {
-            "id": 10,
-            "source_id": 5,
-            "target_id": 9,
-            "note": "Attack a Kimura"
-            },
-            {
-            "id": 11,
-            "source_id": 6,
-            "target_id": 10,
-            "note": "Pass to Side Control"
-            },
-            {
-            "id": 12,
-            "source_id": 6,
-            "target_id": 11,
-            "note": "Attack a Kimura"
-            },
-            {
-            "id": 13,
-            "source_id": 10,
-            "target_id": 7,
-            "note": "Transition to Mount and attack with an Armbar"
-            },
-            {
-            "id": 14,
-            "source_id": 10,
-            "target_id": 8,
-            "note": "Isolate an arm for an Americana"
-            },
-            {
-            "id": 15,
-            "source_id": 10,
-            "target_id": 9,
-            "note": "Attack a Kimura"
-            },
-            {
-            "id": 16,
-            "source_id": 12,
-            "target_id": 13,
-            "note": "Rear Naked Choke"
+            "note": "From back control, secure collar control, tilt head, lengthen arm for choke."
             }
         ]
     }
