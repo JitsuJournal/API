@@ -133,7 +133,7 @@ def create_flowchart(client: genai.Client,
     # Create a flowchart/directed graph using the sequences steps,
     # and using appropriate branching where applicable
     flowchart = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.0-flash",
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
@@ -149,7 +149,7 @@ def create_flowchart(client: genai.Client,
             - Each node should be assigned a unique node ID (e.g. 1, 2, etc.)
             - Each node must include:
                 - `id`: the node ID
-                - `techinque`: ID and other info from the provided technique list
+                - `techinque_id`: ID from the provided technique list
             - Each edge should connect `source` to `target` using node IDs
             - Edge note is for optionally explaining how to go from one node to the next.
             """]

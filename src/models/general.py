@@ -13,20 +13,9 @@ class Sequence(BaseModel):
     name: str
     steps: list[str]
 
-class Tag(BaseModel):
-    id: int
-    name: str
-
-class Technique(BaseModel):
-    id: int
-    name: str
-    description: str
-    tags: list[Tag]
-    cat_id: int
-
 class Node(BaseModel):
     id: int # Unique node id
-    technique: Technique  # Reference to full technique info
+    technique_id: int
 
 class Edge(BaseModel):
     id: int # Unique edge id
@@ -35,6 +24,7 @@ class Edge(BaseModel):
     note: Optional[str] = None
 
 class Graph(BaseModel):
+    name: str
     # Directed graph representation
     nodes: list[Node]
     edges: list[Edge]

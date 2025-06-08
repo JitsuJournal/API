@@ -2,12 +2,10 @@
 # System
 from typing import Annotated
 # Local
-from src.models import Reactflow
 from src.models.general import Solution, Sequence, Graph
-from src.models.general import Node, Technique, Edge # Models using for test endpoint
+from src.models.general import Node, Edge # Models used for old test endpoint
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
-from src.utils.general import shape_nodes, shape_edges
 # Third party
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -37,15 +35,15 @@ app.add_middleware(
 async def root():
     return {"message": "Hello world"}
 
-
+"""
 @app.get('/test', response_model=Reactflow)
 def test():
-    """
+    # --- NOTE: use " instead of -
     Endpoint that returns ReactFlow friendly nodes
     and edges from Sequence 581. Useful for querying
     multiple times to set positions, redirect,
     or test any other feature in the frontend/client side.
-    """
+    # ---
     # Define constant nodes based on sequence 581
     node_a = Node(
         id=1,
@@ -146,12 +144,73 @@ def test():
     # Return jitsujournal friendly graph to the user
     # FastAPI automatically dumps the model as JSON
     return jitsujournal
+"""
 
+@app.get('/test', response_model=Graph)
+def test():
+    """
+    Endpoint that returns a basic list of nodes with technique ID
+    and edges that reference the nodes as source/target using ID's,
+    and finally also contains optional notes describing transitions
+    in more detail.
+    """
+    data = {
+        "name": "Mount Attack Sequence",
+        "nodes": [
+            {
+            "id": 1,
+            "technique_id": 3
+            },
+            {
+            "id": 2,
+            "technique_id": 31
+            },
+            {
+            "id": 3,
+            "technique_id": 32
+            },
+            {
+            "id": 5,
+            "technique_id": 25
+            },
+            {
+            "id": 6,
+            "technique_id": 32
+            }
+        ],
+        "edges": [
+            {
+            "id": 1,
+            "source_id": 1,
+            "target_id": 2,
+            "note": "Option 1: Cross-Collar Choke"
+            },
+            {
+            "id": 2,
+            "source_id": 1,
+            "target_id": 3,
+            "note": "If opponent defends choke by pushing your arm, transition to armbar"
+            },
+            {
+            "id": 3,
+            "source_id": 1,
+            "target_id": 5,
+            "note": "If opponent turns away from armbar, take their back"
+            },
+            {
+            "id": 4,
+            "source_id": 5,
+            "target_id": 6,
+            "note": "From back control, secure collar control, tilt head, lengthen arm for choke."
+            }
+        ]
+    }
+    return Graph(**data)
 
 # Actual endpoint for processing a given user problem
 # NOTE/TODO: Convert to a PUT request to ensure we can send large length
 # problems with any special character as required without breaking URL
-@app.get('/solve/{problem}', response_model=Reactflow)
+@app.get('/solve/{problem}', response_model=Graph)#, response_model=Reactflow)
 def solve(
         problem: str, 
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
@@ -251,32 +310,14 @@ def solve(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail='No edges generated.'
         )
+    else:
+        # Update the flowchart names to use the grounded solution
+        # preserving more verbose content/clarity
+        flowchart.name = grounded.name
 
-    # Parse nodes and edges into react-flow friendly shapes
-    # Swap ID's to UUID's and maintain a map to preserve relations
-    try:
-        idMap, reshapedNodes = shape_nodes(flowchart.nodes)
-        reshapedEdges = shape_edges(idMap, flowchart.edges)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail=f'Failed to reformat the nodes and edges. Error: {str(e)}'
-        )
-
-    # Pack response into ReactFlow model, ensuring type safety
-    # use the sequences name as the graph name
-    try:
-        jitsujournal = Reactflow(name=sequence.name, 
-                                initialNodes=reshapedNodes, initialEdges=reshapedEdges)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail=f'Failed to parse output into ReactFlow model. Error: {str(e)}'
-        )
-
-    # Return jitsujournal friendly graph to the user
+    # Return generated directed graph/flowchart to the user
     # FastAPI automatically dumps the model as JSON
-    return jitsujournal
+    return flowchart
 
 
 if __name__=="__main__":
