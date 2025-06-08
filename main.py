@@ -310,6 +310,10 @@ def solve(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail='No edges generated.'
         )
+    else:
+        # Update the flowchart names to use the grounded solution
+        # preserving more verbose content/clarity
+        flowchart.name = grounded.name
 
     # Return generated directed graph/flowchart to the user
     # FastAPI automatically dumps the model as JSON
