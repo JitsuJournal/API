@@ -155,6 +155,7 @@ def test():
     in more detail.
     """
     data = {
+        "name": "AI Test Sequence",
         "nodes": [
             {"id": 1,"technique_id": 87},
             {"id": 2,"technique_id": 84},

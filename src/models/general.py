@@ -24,6 +24,7 @@ class Edge(BaseModel):
     note: Optional[str] = None
 
 class Graph(BaseModel):
+    name: str
     # Directed graph representation
     nodes: list[Node]
     edges: list[Edge]
