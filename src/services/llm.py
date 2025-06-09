@@ -59,18 +59,21 @@ def ground(client:genai.Client, problem:str, solution: str, similar: str):
         ),
         contents=[problem, solution, similar,
             """
-            You are a expert in brazilian gi/no-gi jiu-jitsu and 
-            a professional coach.
+            You are an expert in Brazilian Jiu-Jitsu (gi and no-gi) and a professional coach.
 
-            Given a problem faced by a jiu-jitsu practitioner,
-            a hypothetical/proposed solution,
-            and relevant paragraphs from youtube tutorials, 
-            revise the solution to ensure it:
-                - Uses techniques and paths from the relevant paragraphs
-                - Doesn't contain any contradictions or inconsistences
+            Given:
+            - A problem described by a jiu-jitsu practitioner,
+            - A hypothetical or proposed solution,
+            - A set of relevant paragraphs retrieved from YouTube tutorials,
 
-            Ignore paragraphs that don't actually solve 
-            or address the user problem.
+            Your task:
+            - Synthesize a single, well-grounded solution.
+            - Ensure the final answer strictly uses techniques, positions, and transitions supported by the retrieved paragraphs.
+            - Discard or revise any part of the proposed solution that is not backed by the retrieved material.
+            - Ignore any paragraphs that do not directly address the problem.
+            - Remove contradictions and align the advice with realistic, proven paths from the referenced content.
+
+            Be concise, technical, and helpful—like you're coaching a serious white or blue belt.
             """]
     )
     return grounded
@@ -91,12 +94,15 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
             temperature=0.25
         ),
         contents=[paragraph,
-            """You are a expert in brazilian gi and no-gi jiu-jitsu and professional coach.
-            Your task is to analyze the given paragraph, and extract its 
-            jiu-jitsu sequences, breaking them down step by step.
-            Make sure each step is detailed containing information about technique,
-            position, and any other relevant information.
-            Keep sequence names under 30 characters."""]
+            """
+            You are a expert in brazilian gi/no-gi jiu-jitsu and a professional coach.
+
+            Given the solution to a practitioners jiu-jitsu problem, extract detailed
+            steps from sequences, containing information about techniques,
+            positions, and any other relevant information.
+            
+            Keep sequence names under 30 characters.
+            """]
     )
     return response
 
@@ -128,7 +134,7 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             - Each edge should connect `source` to `target` using node IDs
             - No duplicate edges: each `source`-`target` pair must appear only once
             - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
-            - Edge note should contain information from steps of sequences themselves and how to go from source to target.
+            - Edge note should contain summarized information from steps of sequences themselves including transition details.
             """]
     )
     return flowchart
@@ -172,6 +178,13 @@ if __name__=="__main__":
     # for passing back into model as json string
     sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
 
+    print('-'*15)
+    print(sequences)
+    
+
+    exit()
+
+    
     # import techniques as json string
     techniques: str = get_techniques(supabase)
 
@@ -180,5 +193,5 @@ if __name__=="__main__":
     # or duplicates, which would be the APIs response
     flowchart: Graph = create_flowchart(client, sequences, techniques).parsed
 
-
+    print('-'*15)
     print(flowchart.model_dump_json(indent=2))
