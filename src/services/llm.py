@@ -149,9 +149,11 @@ def create_flowchart(client: genai.Client,
             - Each node should be assigned a unique node ID (e.g. 1, 2, etc.)
             - Each node must include:
                 - `id`: the node ID
-                - `techinque_id`: ID from the provided technique list
+                - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
             - Edge note is for optionally explaining how to go from one node to the next.
+            - No duplicate edges: each `source`-`target` pair must appear only once
+            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
             """]
     )
     return flowchart
