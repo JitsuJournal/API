@@ -99,7 +99,9 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
         contents=[paragraph,
             """You are a expert in brazilian gi and no-gi jiu-jitsu and professional coach.
             Your task is to analyze the given paragraph, and extract its 
-            jiu-jitsu sequences, breaking them down step by step like a flowchart.
+            jiu-jitsu sequences, breaking them down step by step.
+            Make sure each step is detailed containing information about technique,
+            position, and any other relevant information.
             Keep sequence names under 40 characters."""]
     )
     return response
@@ -147,13 +149,15 @@ if __name__=="__main__":
     # TODO: Can try above with a more light weight model
     print(solution.text)
 
-    # extract sequences as a single or many
+    # extract each sequence in paragraph into steps w/ names
     sequences: list[Sequence] = extract_sequences(client=client, paragraph=solution.text).parsed
-    for sequence in sequences:
-        print('-'*20)
-        print(sequence.name)
-        print(sequence.steps)
+    
+    import json
+    # iterate over parsed sequences and dump into dict
+    # for passing back into model as json string
+    sequencesStr = json.dumps([sequence.model_dump() for sequence in sequences])
 
+    
     from .db import conn_supabase, similarity_search, get_techniques
     # Initialize supabase client
     supaClient = conn_supabase()
@@ -167,4 +171,6 @@ if __name__=="__main__":
     # pass sequences and techniques to model
     # and create a flowchart without inconsistencies
     # and prompt to capture conditional branching
-    
+    flowchart: Graph = create_flowchart(client=client, 
+                                        steps=sequences[0].steps,
+                                        techniques=techniques)
