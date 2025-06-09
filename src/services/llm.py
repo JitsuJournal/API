@@ -21,7 +21,7 @@ def create_paragraph(client: genai.Client, problem: str):
     and generates a hypothetical answer in a paragraph as solution.
     """
     solution = client.models.generate_content(
-        model="gemini-2.0-flash-lite",#"gemini-2.5-flash-preview-05-20",
+        model="gemini-2.5-flash-preview-05-20",#"gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
             temperature=0.25
         ),
@@ -62,18 +62,14 @@ def ground(client:genai.Client, problem:str, solution: str, similar: str):
             You are an expert in Brazilian Jiu-Jitsu (gi and no-gi) and a professional coach.
 
             Given:
-            - A problem described by a jiu-jitsu practitioner,
-            - A hypothetical or proposed solution,
-            - A set of relevant paragraphs retrieved from YouTube tutorials,
+            - A problem described by a jiu-jitsu practitioner.
+            - A hypothetical/proposed solution.
+            - A set of relevant paragraphs retrieved from YouTube tutorials.
 
             Your task:
-            - Synthesize a single, well-grounded solution.
-            - Ensure the final answer strictly uses techniques, positions, and transitions supported by the retrieved paragraphs.
-            - Discard or revise any part of the proposed solution that is not backed by the retrieved material.
             - Ignore any paragraphs that do not directly address the problem.
+            - Update the proposed solution to use relevant techniques, positions, and transitions from the retrieved paragraphs.
             - Remove contradictions and align the advice with realistic, proven paths from the referenced content.
-
-            Be concise, technical, and helpful—like you're coaching a serious white or blue belt.
             """]
     )
     return grounded
@@ -97,8 +93,8 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
             """
             You are a expert in brazilian gi/no-gi jiu-jitsu and a professional coach.
 
-            Given the solution to a practitioners jiu-jitsu problem, extract detailed
-            steps from sequences, containing information about techniques,
+            Break down the solution to a practitioners jiu-jitsu problem into detailed
+            steps, containing information about techniques,
             positions, and any other relevant information.
             
             Keep sequence names under 30 characters.
@@ -114,13 +110,13 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
     # Create a flowchart/directed graph using the sequences steps,
     # and using appropriate branching where applicable
     flowchart = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash-preview-05-20",
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
             temperature=0.25
         ),
-        contents=[techniques, sequences,
+        contents=[techniques, grounded, sequences,
             """
             Create a directed graph that captures the given jiu-jitsu sequences steps 
             using branching where appropriate.
@@ -134,7 +130,6 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             - Each edge should connect `source` to `target` using node IDs
             - No duplicate edges: each `source`-`target` pair must appear only once
             - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
-            - Edge note should contain summarized information from steps of sequences themselves including transition details.
             """]
     )
     return flowchart
@@ -178,13 +173,6 @@ if __name__=="__main__":
     # for passing back into model as json string
     sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
 
-    print('-'*15)
-    print(sequences)
-    
-
-    exit()
-
-    
     # import techniques as json string
     techniques: str = get_techniques(supabase)
 
@@ -195,3 +183,9 @@ if __name__=="__main__":
 
     print('-'*15)
     print(flowchart.model_dump_json(indent=2))
+
+
+    # TODO/NOTE: Create notes and name sequence, passing the flowchart
+    # and the actual solution for contents, output should match Graph object
+    # with an update/actual name and notes should be under 350 characters
+    # allowing begginers to read and understand.
