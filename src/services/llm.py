@@ -118,8 +118,9 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
         ),
         contents=[techniques, sequences,
             """
-            Create a directed graph that captures the given jiu-jitsu sequences steps 
-            using branching where appropriate.
+            Given different jiu-jitsu sequences that solves a practitioners 
+            problem, ignore repeated information, and create a single directed graph
+            that merges the sequences steps with branching where appropriate.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
@@ -130,6 +131,10 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             - Each edge should connect `source` to `target` using node IDs
             - No duplicate edges: each `source`-`target` pair must appear only once
             - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
+
+            After creating the graph:
+            - Create rich edge notes with information and coaching tips from the provided sequences (under 350 chars).
+            - Name the graph based on the used sequences (under 20 char)
             """]
     )
     return flowchart
