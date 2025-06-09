@@ -87,34 +87,20 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
     returns a list of different Sequence objects 
     (sequence name, list of steps)
     """
-
-    # If single, we use LLM to convert the paragraph into one sequence,
-    # preserving the paths and returning one list of steps.
-    if single:
-        prompt = """
-            Your task is to analyze the given jiu-jitsu sequence in a paragraph
-            and break it down step by step. Maintain the original tone and phrasing.
-            Keep sequence name under 40 characters.
-            """
-    else: # Else, we extract any sequence into seperate lists of steps
-        prompt = """
-            Your task is to analyze the given jiu-jitsu tutorial transcript
-            and extract any jiu-jitsu sequence, breaking them down step by step.
-            Maintain the original transcripts tone and phrasing.
-            Keep sequence names under 40 characters.
-            """
-
     # Analyze and extract sequences from the given paragraph
     # isolating key information to create flowcharts with
     response = client.models.generate_content(
         model="gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
-            system_instruction="You are a expert in brazilian gi/no-gi jiu-jitsu capable of breaking down sequences into flowchart like steps.", 
             response_mime_type="application/json",
             response_schema=Sequence if single else list[Sequence],
             temperature=0.25
         ),
-        contents=[paragraph,prompt]
+        contents=[paragraph,
+            """You are a expert in brazilian gi and no-gi jiu-jitsu and professional coach.
+            Your task is to analyze the given paragraph, and extract its 
+            jiu-jitsu sequences, breaking them down step by step like a flowchart.
+            Keep sequence names under 40 characters."""]
     )
     return response
 
@@ -154,10 +140,31 @@ def create_flowchart(client: genai.Client,
     )
     return flowchart
 
-
-
 if __name__=="__main__":
     client = conn_gemini()
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
     solution = create_paragraph(client, problem)
+    # TODO: Can try above with a more light weight model
     print(solution.text)
+
+    # extract sequences as a single or many
+    sequences: list[Sequence] = extract_sequences(client=client, paragraph=solution.text).parsed
+    for sequence in sequences:
+        print('-'*20)
+        print(sequence.name)
+        print(sequence.steps)
+
+    from .db import conn_supabase, similarity_search, get_techniques
+    # Initialize supabase client
+    supaClient = conn_supabase()
+
+    # TODO: Find similar and ground
+
+
+    # Import techniques as json string
+    techniques = get_techniques(supaClient)
+
+    # pass sequences and techniques to model
+    # and create a flowchart without inconsistencies
+    # and prompt to capture conditional branching
+    
