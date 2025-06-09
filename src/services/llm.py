@@ -55,27 +55,22 @@ def ground(client:genai.Client, problem:str, solution: str, similar: str):
     grounded = client.models.generate_content(
         model="gemini-2.5-flash-preview-05-20",
         config=types.GenerateContentConfig(
-            system_instruction="""
-                You are a expert in brazilian gi and no-gi jiu-jitsu and 
-                a professional coach capable of evaluating 
-                jiu-jitsu sequences and assessing if they solve a 
-                user problem.
-            """,
             temperature=0.25
         ),
         contents=[problem, solution, similar,
             """
-            You are a expert in brazilian gi and no-gi jiu-jitsu and 
-            a professional coach. Given a problem faced by a 
-            jiu-jitsu practitioner, a generated solution,
-            and sequences as paragraphs from sequences retrived
-            from youtube, ground said solution to 
-            actually use the techniques, positions, 
-            and paths from the relevant paragraphs.
-            
-            Also refer to the paragraphs to remove any contradictions 
-            or inconsistences from the generated solution. Ignore
-            paragraphs that don't actually solve or address the user problem.
+            You are a expert in brazilian gi/no-gi jiu-jitsu and 
+            a professional coach.
+
+            Given a problem faced by a jiu-jitsu practitioner,
+            a hypothetical/proposed solution,
+            and relevant paragraphs from youtube tutorials, 
+            revise the solution to ensure it:
+                - Uses techniques and paths from the relevant paragraphs
+                - Doesn't contain any contradictions or inconsistences
+
+            Ignore paragraphs that don't actually solve 
+            or address the user problem.
             """]
     )
     return grounded
@@ -101,7 +96,7 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
             jiu-jitsu sequences, breaking them down step by step.
             Make sure each step is detailed containing information about technique,
             position, and any other relevant information.
-            Keep sequence names under 40 characters."""]
+            Keep sequence names under 30 characters."""]
     )
     return response
 
@@ -144,8 +139,7 @@ if __name__=="__main__":
 
     client = conn_gemini()
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
-    solution = create_paragraph(client, problem)
-    # TODO: Can try above with a more light weight model
+    solution = create_paragraph(client, problem) # NOTE: Need to switch to stronger model
     print(solution.text)
 
     # Initialize supabase client
@@ -179,7 +173,7 @@ if __name__=="__main__":
     sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
 
     # import techniques as json string
-    techniques = get_techniques(supabase)
+    techniques: str = get_techniques(supabase)
 
     # pass sequences and techniques to model
     # and create a flowchart without inconsistencies
