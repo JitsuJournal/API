@@ -21,7 +21,7 @@ def create_paragraph(client: genai.Client, problem: str):
     and generates a hypothetical answer in a paragraph as solution.
     """
     solution = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20",#"gemini-2.0-flash-lite",
+        model="gemini-2.0-flash-lite",#"gemini-2.5-flash-preview-05-20",
         config=types.GenerateContentConfig(
             temperature=0.25
         ),
@@ -110,7 +110,7 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
     # Create a flowchart/directed graph using the sequences steps,
     # and using appropriate branching where applicable
     flowchart = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20",
+        model="gemini-2.0-flash-lite",#"gemini-2.5-flash-preview-05-20",
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
@@ -119,10 +119,10 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
         contents=[techniques, sequences,
             """
             Given different jiu-jitsu sequences that solves a practitioners 
-            problem, ignore repeated information, and create a single directed graph
+            problem, ignore duplicates, and create a single directed graph
             that merges the most important sequences steps with branching where appropriate.
             Make sure you select the sequences with best probability of success without
-            overwhelming the practitioner with too many options.
+            overwhelming the practitioner with too many options (max 10 nodes)
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
