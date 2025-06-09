@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 # Local
-from ..models.general import Solution, Sequence, Graph
+from ..models.general import Sequence, Graph
 # Third Party
 from google import genai
 from google.genai import types, Client
@@ -53,7 +53,7 @@ def ground(client:genai.Client, problem:str, solution: str, similar: str):
     and inconsistences or contradictions.
     """
     grounded = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20",
+        model="gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
             temperature=0.25
         ),
@@ -120,7 +120,9 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             """
             Given different jiu-jitsu sequences that solves a practitioners 
             problem, ignore repeated information, and create a single directed graph
-            that merges the sequences steps with branching where appropriate.
+            that merges the most important sequences steps with branching where appropriate.
+            Make sure you select the sequences with best probability of success without
+            overwhelming the practitioner with too many options.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
@@ -133,7 +135,8 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
 
             After creating the graph:
-            - Create rich edge notes with information and coaching tips from the provided sequences (under 350 chars).
+            - Create rich edge notes with information and coaching tips from the provided sequences
+            - Edge notes should be explaining the sequence path, techniques, position, and transition (max 350 char)
             - Name the graph based on the used sequences (under 20 char)
             """]
     )
@@ -188,9 +191,3 @@ if __name__=="__main__":
 
     print('-'*15)
     print(flowchart.model_dump_json(indent=2))
-
-
-    # TODO/NOTE: Create notes and name sequence, passing the flowchart
-    # and the actual solution for contents, output should match Graph object
-    # with an update/actual name and notes should be under 350 characters
-    # allowing begginers to read and understand.

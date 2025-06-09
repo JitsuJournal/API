@@ -1,14 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class Solution(BaseModel):
-    name: str
-    paragraph: str
-
-class Relevance(BaseModel):
-    score: float
-    reason: str
-
 class Sequence(BaseModel):
     name: str
     steps: list[str]
