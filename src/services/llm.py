@@ -106,13 +106,10 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
     )
     return response
 
-def create_flowchart(client: genai.Client,
-                     steps: list, techniques: str):
+def create_flowchart(client: genai.Client, sequences: str, techniques: str):
     """
-    Given a list of steps, this function
-    returns a Graph object containing a list of nodes
-    and edges. This function requires techniques matching
-    with the technique model, provided as a JSON str.
+    Given sequences and techniques as a JSON str,
+    return a Graph object containing a list of nodes and edges.
     """
     # Create a flowchart/directed graph using the sequences steps,
     # and using appropriate branching where applicable
@@ -123,9 +120,9 @@ def create_flowchart(client: genai.Client,
             response_schema=Graph,
             temperature=0.25
         ),
-        contents=[techniques, steps,
+        contents=[techniques, sequences,
             """
-            Create a directed graph that captures the given jiu-jitsu sequence steps 
+            Create a directed graph that captures the given jiu-jitsu sequences steps 
             using branching where appropriate.
 
             Requirements:
@@ -135,9 +132,9 @@ def create_flowchart(client: genai.Client,
                 - `id`: the node ID
                 - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
-            - Edge note is for optionally explaining how to go from one node to the next.
             - No duplicate edges: each `source`-`target` pair must appear only once
             - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
+            - Edge note should contain information from steps of sequences themselves and how to go from source to target.
             """]
     )
     return flowchart
@@ -150,14 +147,13 @@ if __name__=="__main__":
     print(solution.text)
 
     # extract each sequence in paragraph into steps w/ names
-    sequences: list[Sequence] = extract_sequences(client=client, paragraph=solution.text).parsed
+    extracted: list[Sequence] = extract_sequences(client=client, paragraph=solution.text).parsed
     
     import json
     # iterate over parsed sequences and dump into dict
     # for passing back into model as json string
-    sequencesStr = json.dumps([sequence.model_dump() for sequence in sequences])
+    sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
 
-    
     from .db import conn_supabase, similarity_search, get_techniques
     # Initialize supabase client
     supaClient = conn_supabase()
@@ -168,9 +164,11 @@ if __name__=="__main__":
     # Import techniques as json string
     techniques = get_techniques(supaClient)
 
+
     # pass sequences and techniques to model
     # and create a flowchart without inconsistencies
-    # and prompt to capture conditional branching
-    flowchart: Graph = create_flowchart(client=client, 
-                                        steps=sequences[0].steps,
-                                        techniques=techniques)
+    # or duplicates, which would be the APIs response
+    flowchart: Graph = create_flowchart(client, sequences, techniques)
+
+
+    print(flowchart.model_dump_json(indent=2))
