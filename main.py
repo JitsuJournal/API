@@ -1,9 +1,9 @@
 # TODO: Handle any errors in the middle, passing msgs w/ appropriate error codes)
 # System
+import json
 from typing import Annotated
 # Local
-from src.models.general import Solution, Sequence, Graph
-from src.models.general import Node, Edge # Models used for old test endpoint
+from src.models.general import Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques
 # Third party
@@ -34,117 +34,6 @@ app.add_middleware(
 @app.get('/')
 async def root():
     return {"message": "Hello world"}
-
-"""
-@app.get('/test', response_model=Reactflow)
-def test():
-    # --- NOTE: use " instead of -
-    Endpoint that returns ReactFlow friendly nodes
-    and edges from Sequence 581. Useful for querying
-    multiple times to set positions, redirect,
-    or test any other feature in the frontend/client side.
-    # ---
-    # Define constant nodes based on sequence 581
-    node_a = Node(
-        id=1,
-        #id='269f01de-1574-4896-ba3b-9372e07bbc7c', 
-        technique=Technique(
-            id=34, name='Triangle', 
-            description="A technique where the legs are used to encircle the opponent's neck and one arm, creating a triangle shape that constricts blood flow to the brain.",
-            tags=[{'id': 10, 'name': 'artery'}],
-            cat_id=2
-        )
-    )
-    node_b = Node(
-        #id='3a2913de-59d6-4ac9-a957-eeb329b7b74d', 
-        id=2,
-        technique=Technique(
-            id=9, name='Standard Side Control',
-            description="Controlling the opponent from the side while pinning their shoulders and hips, maintaining pressure with chest-to-chest contact.",
-            tags=[{'id': 2, 'name': 'seated'},{'id': 1, 'name': 'top'}],
-            cat_id=1
-        )
-    )
-    node_c = Node(
-        #id='b49ffa65-03e7-411d-be7a-6bbaf06543b9', 
-        id=3,
-        technique=Technique(
-            id=3, name='Low Mount',
-            description="Sitting directly on the opponent's stomach with knees close to their hips, providing a stable base and control but with limited submission opportunities.",
-            tags=[{'id': 1, 'name': 'top'}],
-            cat_id=1
-        )
-    )
-    node_d = Node(
-        #id='c0c64f73-a9a4-43f9-ad85-37b5a3b57cec', 
-        id=4,
-        technique=Technique(
-            id=41, name='Americana',
-            description="Controlling the opponent from the side while pinning their shoulders and hips, maintaining pressure with chest-to-chest contact.",
-            tags=[{'id': 11, 'name': 'shoulder'}],
-            cat_id=2
-        )
-    )
-    node_e = Node(
-        #id='a766adaa-2f18-4285-9b02-94d02e71d63d', 
-        id=5,
-        technique=Technique(
-            id=39, name='Arm Bar',
-            description="A joint lock that hyperextends the elbow joint, typically applied by trapping the opponent's arm between your legs and pulling on the wrist while pushing with the hips.",
-            tags=[{'id': 12, 'name': 'elbow'}],
-            cat_id=2
-        )
-    )
-    # Define constant edges based on sequence 581
-    edge_c_d = Edge(
-        id=1,
-        source_id=3, 
-        target_id=4,
-        note='Attempt Americana.'
-    )
-    edge_c_a = Edge(
-        id=2, 
-        source_id=3, 
-        target_id=1,
-        note='Opponent frames on hip, collect arm with knee, crossface, grab armpit, and throw leg over for triangle.'
-    )
-    edge_b_c = Edge(
-        id=3,
-        source_id=2, 
-        target_id=3,
-        note='Transition from side control to mount.'
-    )
-    edge_d_e = Edge(
-        id=4,
-        source_id=4, 
-        target_id=5,
-        note='Opponent defends Americana, transition to arm lock.'
-    )
-    # Pack raw nodes and edges into a list
-    rawNodes: list[Node] = [node_a, node_b, node_c, node_d, node_e]
-    rawEdges: list[Edge] = [edge_c_d, edge_c_a, edge_b_c, edge_d_e]
-
-    # reshape the constant nodes and edges
-    # generating unique ID's for passing back to the user 
-    idMap, reshapedNodes = shape_nodes(nodes=rawNodes)
-    reshapedEdges = shape_edges(idMap, rawEdges)
-
-    # Initialize ReactFlow object
-    # Pack response into ReactFlow model, ensuring type safety
-    # use the sequences name as the graph name
-    try:
-        jitsujournal = Reactflow(name='Sample Side Sequence', 
-                                initialNodes=reshapedNodes, initialEdges=reshapedEdges)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_424_FAILED_DEPENDENCY,
-            detail=f'Failed to parse output into ReactFlow model. Error: {str(e)}'
-        )
-
-    # Return jitsujournal friendly graph to the user
-    # FastAPI automatically dumps the model as JSON
-    return jitsujournal
-"""
 
 @app.get('/test', response_model=Graph)
 def test():
@@ -222,8 +111,8 @@ def solve(
     Passed into the app for creating initial nodes and edges.
     """
     try:
-        # Create a hypothetical solution paragraph using the users problem
-        hypothetical: Solution = create_paragraph(gemini, problem).parsed
+        # Create a hypothetical solution using the users problem
+        hypothetical: str = create_paragraph(gemini, problem).text
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -233,7 +122,7 @@ def solve(
     # Create embedding using the hypothetical solution
     # Used for searching tutorials with similar content
     try:
-        embedding = create_embedding(gemini, paragraph=hypothetical.paragraph)
+        embedding = create_embedding(gemini, paragraph=hypothetical)
         vector: list[float] = embedding.embeddings[0].values
     except Exception as e:
         raise HTTPException(
@@ -245,7 +134,12 @@ def solve(
         # Retrive similar records to the generated solution from Supabase
         # NOTE: Using default match threshold and count for searching
         similar = similarity_search(client=supabase, vector=vector)
-        paragraphs: list[str] = [data['content'] for data in similar.data]
+        # Flatten into a json string to pass to LLM for grounding
+        paragraphs: str = json.dumps([{
+                'name': sequence['name'],
+                'paragraph': sequence['content']
+            } for sequence in similar.data]
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -256,8 +150,8 @@ def solve(
     # Use top-k records in similar
     # to gound the hypothetical result
     try:
-        grounded: Solution = ground(client=gemini, problem=problem, 
-                        paragraphs=paragraphs, solution=hypothetical.paragraph).parsed
+        grounded = ground(client=gemini, problem=problem, 
+                        solution=hypothetical, similar=paragraphs)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -267,7 +161,12 @@ def solve(
 
     # Convert grounded answer into steps in a sequence
     try:
-        sequence: Sequence = extract_sequences(client=gemini, paragraph=grounded.paragraph, single=True).parsed
+        extracted: list[Sequence] = extract_sequences(client=gemini, paragraph=grounded.text).parsed
+    
+        # iterate over parsed sequences and dump into dict
+        # for passing back into model as json string
+        sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
+    
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -288,7 +187,8 @@ def solve(
     try:
         # Use grounded steps with retrieved techniques
         # and create a basic lightweight directed graph
-        flowchart: Graph = create_flowchart(client=gemini, steps=sequence.steps, techniques=techniques).parsed
+        flowchart: Graph = create_flowchart(client=gemini, sequences=sequences,
+                                            techniques=techniques).parsed
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -310,10 +210,12 @@ def solve(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail='No edges generated.'
         )
+    """
     else:
         # Update the flowchart names to use the grounded solution
         # preserving more verbose content/clarity
         flowchart.name = grounded.name
+    """
 
     # Return generated directed graph/flowchart to the user
     # FastAPI automatically dumps the model as JSON

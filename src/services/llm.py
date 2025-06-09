@@ -116,7 +116,7 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             response_schema=Graph,
             temperature=0.25
         ),
-        contents=[techniques, grounded, sequences,
+        contents=[techniques, sequences,
             """
             Create a directed graph that captures the given jiu-jitsu sequences steps 
             using branching where appropriate.
