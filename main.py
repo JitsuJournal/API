@@ -8,7 +8,7 @@ from src.services.llm import conn_gemini, create_paragraph, create_embedding, gr
 from src.services.db import conn_supabase, similarity_search, get_techniques
 # Third party
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Body
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
 # For cross origin resource sharing
@@ -26,7 +26,7 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    # allow_methods=["*"], NOTE: Default is GET
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -99,9 +99,9 @@ def test():
 # Actual endpoint for processing a given user problem
 # NOTE/TODO: Convert to a PUT request to ensure we can send large length
 # problems with any special character as required without breaking URL
-@app.get('/solve/{problem}', response_model=Graph)#, response_model=Reactflow)
+@app.post('/solve/', response_model=Graph)#, response_model=Reactflow)
 def solve(
-        problem: str, 
+        problem: Annotated[str, Body()],
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
         supabase: Annotated[DbClient, Depends(conn_supabase)],
     ):
