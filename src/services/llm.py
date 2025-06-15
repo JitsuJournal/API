@@ -137,7 +137,7 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             After creating the graph:
             - Create rich edge notes with information and coaching tips from the provided sequences
             - Edge notes should be explaining the sequence path, techniques, position, and transition (max 350 char)
-            - Name the graph based on the used sequences (under 20 char)
+            - Generate a meaningful name for the graph in under 20 char to capture it's purpose
             """]
     )
     return flowchart
