@@ -8,10 +8,13 @@ from supabase import create_client, Client
 
 load_dotenv()
 
-def conn_supabase()->Client:
+def conn_supabase(key:str='')->Client:
+    # Use anon public key 
+    # if no other key (e.x. service role) was provided
+    if key=='': key = os.environ.get("SUPABASE_KEY")
     return create_client(
         supabase_url=os.environ.get("SUPABASE_URL"), 
-        supabase_key=os.environ.get("SUPABASE_KEY")
+        supabase_key=key
     )
 
 # function for performing similarity search
@@ -57,8 +60,16 @@ def get_techniques(client: Client)->str:
     return json.dumps(response.data)
 
 
+def get_user_limit(client: Client):
+
+    return
+
+def get_usage():
+    return
+
+
 if __name__=="__main__":
     client=conn_supabase()
-    techniques = get_techniques(client)
+    #techniques = get_techniques(client)
     
-    print(techniques)
+    print(client)
