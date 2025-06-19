@@ -2,19 +2,17 @@
 import os
 import json
 from dotenv import load_dotenv
+from datetime import datetime, timezone
 # Local
 # Third Party
 from supabase import create_client, Client
 
 load_dotenv()
 
-def conn_supabase(key:str='')->Client:
-    # Use anon public key 
-    # if no other key (e.x. service role) was provided
-    if key=='': key = os.environ.get("SUPABASE_KEY")
+def conn_supabase()->Client:
     return create_client(
         supabase_url=os.environ.get("SUPABASE_URL"), 
-        supabase_key=key
+        supabase_key=os.environ.get("SUPABASE_SERVICE_KEY")
     )
 
 # function for performing similarity search
@@ -60,16 +58,57 @@ def get_techniques(client: Client)->str:
     return json.dumps(response.data)
 
 
-def get_user_limit(client: Client):
+def get_user_limit(client: Client, userid: str) -> int:
+    """
+    Given a User ID, this function users the Supabase client
+    under a service role to return the usage record limit rate,
+    only if it is effective_from <= today and effective till >= today or null.
+    """
+    # Initialize the time now as a iso string to filter queries by
+    now: datetime = datetime.now(timezone.utc)
 
-    return
+    # Assuming user ID is valid, query the usage limit record
+    # sorted by created_at in descending order
+    # and select the last created
+    retrieved = (
+        client.table('user_limits')
+        .select('rate, period, expires_at')
+        .eq('user_id', userid)
+        .eq('feature', 'askai')
+        .lte("effective_from", now.isoformat())
+        .order("created_at", desc=True)
+        .execute()
+    ).data
+
+    response: int = 0
+    if len(retrieved)>0:
+        last_created = retrieved[0]
+        # If the usage limit exists and is expired, return default
+        # otherwise simply return the rate and period as retrived n set below
+        expires_at: str = last_created["expires_at"]
+        response: int = last_created['rate']
+        if expires_at:
+            # convert string to dt w/ utc timezone mapped
+            # and check if the dt for expires_at >= today
+            expires_dt: datetime = datetime.fromisoformat(expires_at).replace(tzinfo=timezone.utc)
+            # if it is low, return default 0
+            if expires_dt<now:
+                response: int = 0
+
+    return response
 
 def get_usage():
     return
 
 
 if __name__=="__main__":
+    TEST_UID:str = os.environ.get('HARRI_UID')
+    TEST2_UID:str = os.environ.get('HARRI2_UID')
+    
     client=conn_supabase()
     #techniques = get_techniques(client)
     
-    print(client)
+    # Given a user ID
+    # Get their usage limit record
+    response = get_user_limit(client, TEST_UID)
+    print(response)
