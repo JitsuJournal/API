@@ -98,6 +98,15 @@ def get_user_limit(client: Client, userid: str) -> int:
     return response
 
 def get_usage():
+    """
+    This function is responsible for counting the number of attempts
+    the user has made since the beggining of their current usage period
+    and returning that number for controlling the users usage.
+    """
+
+    # query all the 
+
+    
     return
 
 
