@@ -134,6 +134,8 @@ def log_use(client: Client, userid: str, feature:str='askai'):
     a record in the usage table to indicate that the user
     used the AskAI feature to generate a flowchart.
     """
+    # NOTE: Going to increment use only when generation is successful
+    # else just notify the user to try again later at another time
 
     # metadata will contain the initial user problem
     # followed by all the related solve endpoint's LLM pipelines' data
