@@ -2,7 +2,7 @@
 import os
 import json
 from dotenv import load_dotenv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 # Local
 # Third Party
 from supabase import create_client, Client
@@ -80,20 +80,20 @@ def get_user_limit(client: Client, userid: str) -> int:
         .execute()
     ).data
 
-    response: int = 0
+    # Initialize the default response
+    response: int = 0 
+    # If the data + usage limit exists and is expired, return default
+    # otherwise simply return the rate and period as retrived and set below
     if len(retrieved)>0:
         last_created = retrieved[0]
-        # If the usage limit exists and is expired, return default
-        # otherwise simply return the rate and period as retrived n set below
         expires_at: str = last_created["expires_at"]
         response: int = last_created['rate']
         if expires_at:
             # convert string to dt w/ utc timezone mapped
             # and check if the dt for expires_at >= today
             expires_dt: datetime = datetime.fromisoformat(expires_at).replace(tzinfo=timezone.utc)
-            # if it is low, return default 0
-            if expires_dt<now:
-                response: int = 0
+            # if the current limit has already expired, return default 0
+            if expires_dt<now: response: int = 0
 
     return response
 
@@ -101,13 +101,31 @@ def get_usage(client: Client, userid: str)->int:
     """
     This function is responsible for counting the number of attempts
     the user has made since the beggining of their current usage period
-    and returning that number for controlling the users usage.
+    and returning that number for limiting their token consumption.
     """
+
+    # Initialize the current month and nexts dates
+    # for using to filter current periods usage records
+    today: datetime = datetime.now(timezone.utc)
+    start_month: datetime = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    next_month: datetime = (start_month+timedelta(days=32)).replace(day=1)
 
     # query all the given users usage for a given period (i.e. current month)
     # return the count as the functions response
+    response = (
+        client.table('usage')
+        .select('used_at', count='exact')
+        # Filter for requested users data
+        .eq('user_id', userid)
+        .eq('feature', 'askai')
+        # Filter to only return the current periods records
+        .gte('used_at', start_month.isoformat()) 
+        .lte('used_at', next_month.isoformat()) 
+        .execute()
+    )
 
-    return
+    # Return 0 if no count, or the usage count as is
+    return response.count if response.count!=None else 0
 
 
 if __name__=="__main__":
@@ -117,7 +135,8 @@ if __name__=="__main__":
     client=conn_supabase()
     #techniques = get_techniques(client)
     
-    # Given a user ID
-    # Get their usage limit record
-    response = get_user_limit(client, TEST_UID)
-    print(response)
+    limit: int = get_user_limit(client, TEST_UID)
+    usage: int = get_usage(client, TEST_UID)
+
+    print('Limit:', limit)
+    print('Used:', usage)
