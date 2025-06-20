@@ -128,6 +128,26 @@ def get_usage(client: Client, userid: str)->int:
     return response.count if response.count!=None else 0
 
 
+def log_use(client: Client, userid: str, feature:str='askai'):
+    """
+    This function uses the supabase client and creates
+    a record in the usage table to indicate that the user
+    used the AskAI feature to generate a flowchart.
+    """
+
+    # metadata will contain the initial user problem
+    # followed by all the related solve endpoint's LLM pipelines' data
+
+    # create a new record passing in the user ID
+    # and the metadata
+    # the date/time for usage is set automatically in DB side
+
+    # view response to indicate created/success
+    # if failed, just skip and keep going on
+    # (alternatively throw error on skip, but done in endpoint func.)
+
+    return
+
 if __name__=="__main__":
     TEST_UID:str = os.environ.get('HARRI_UID')
     TEST2_UID:str = os.environ.get('HARRI2_UID')
