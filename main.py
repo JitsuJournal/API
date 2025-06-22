@@ -97,9 +97,7 @@ def test():
     return Graph(**data)
 
 # Actual endpoint for processing a given user problem
-# NOTE/TODO: Convert to a PUT request to ensure we can send large length
-# problems with any special character as required without breaking URL
-@app.post('/solve/', response_model=Graph)#, response_model=Reactflow)
+@app.post('/solve/', response_model=Graph)
 def solve(
         query: Annotated[UserQuery, Body()],
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
