@@ -3,7 +3,7 @@
 import json
 from typing import Annotated
 # Local
-from src.models.general import Sequence, Graph
+from src.models.general import UserQuery, Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
 from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
@@ -101,7 +101,7 @@ def test():
 # problems with any special character as required without breaking URL
 @app.post('/solve/', response_model=Graph)#, response_model=Reactflow)
 def solve(
-        problem: Annotated[str, Body()],
+        query: Annotated[UserQuery, Body()],
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
         supabase: Annotated[DbClient, Depends(conn_supabase)],
     ):
@@ -110,9 +110,21 @@ def solve(
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
+
+    # Before processing the request,
+    # we first check if the user is within their rate limit
+    used = get_usage(supabase, query.user_id)
+    limit = get_user_limit(supabase, query.user_id)
+    if used>=limit:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f'Usage limit exceeded for the current period.'
+        )
+
+
     try:
         # Create a hypothetical solution using the users problem
-        hypothetical: str = create_paragraph(gemini, problem).text
+        hypothetical: str = create_paragraph(gemini, query.problem).text
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -150,7 +162,7 @@ def solve(
     # Use top-k records in similar
     # to gound the hypothetical result
     try:
-        grounded = ground(client=gemini, problem=problem, 
+        grounded = ground(client=gemini, problem=query.problem, 
                         solution=hypothetical, similar=paragraphs)
     except Exception as e:
         raise HTTPException(

@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class UserQuery(BaseModel): # Model 
+    user_id: str
+    problem: str
+
 class Sequence(BaseModel):
     name: str
     steps: list[str]
