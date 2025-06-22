@@ -5,7 +5,7 @@ from typing import Annotated
 # Local
 from src.models.general import Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
-from src.services.db import conn_supabase, similarity_search, get_techniques
+from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, Body
