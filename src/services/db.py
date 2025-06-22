@@ -57,7 +57,6 @@ def get_techniques(client: Client)->str:
     """
     return json.dumps(response.data)
 
-
 def get_user_limit(client: Client, userid: str) -> int:
     """
     Given a User ID, this function users the Supabase client
@@ -127,28 +126,27 @@ def get_usage(client: Client, userid: str)->int:
     # Return 0 if no count, or the usage count as is
     return response.count if response.count!=None else 0
 
-
-def log_use(client: Client, userid: str, feature:str='askai'):
+def log_use(client: Client, userid: str, feature:str='askai', metadata:dict|None=None)->None:
     """
     This function uses the supabase client and creates
-    a record in the usage table to indicate that the user
-    used the AskAI feature to generate a flowchart.
+    a record in the usage table to keep track of how much
+    the user is using askai or other JitsuJournal features.
     """
-    # NOTE: Going to increment use only when generation is successful
-    # else just notify the user to try again later at another time
+    # create payload for inserting a usage record
+    # w/ required user_id and metadata if given
+    # NOTE: The used_at field defaults to now() db side
+    payload = {'user_id': userid, 'feature': feature}
+    if metadata: payload['metadata'] = metadata
 
-    # metadata will contain the initial user problem
-    # followed by all the related solve endpoint's LLM pipelines' data
-
-    # create a new record passing in the user ID
-    # and the metadata
-    # the date/time for usage is set automatically in DB side
-
-    # view response to indicate created/success
-    # if failed, just skip and keep going on
-    # (alternatively throw error on skip, but done in endpoint func.)
-
+    # Use Supabase client and pass payload 
+    # to insert into usage table
+    __ = (
+        client.table('usage')
+        .insert(payload)
+        .execute()
+    )
     return
+
 
 if __name__=="__main__":
     TEST_UID:str = os.environ.get('HARRI_UID')
@@ -157,8 +155,18 @@ if __name__=="__main__":
     client=conn_supabase()
     #techniques = get_techniques(client)
     
-    limit: int = get_user_limit(client, TEST_UID)
-    usage: int = get_usage(client, TEST_UID)
+    #limit: int = get_user_limit(client, TEST_UID)
+    #usage: int = get_usage(client, TEST_UID)
 
-    print('Limit:', limit)
-    print('Used:', usage)
+    #print('Limit:', limit, 'Used:', usage)
+    #print('Can use:', usage<limit)
+
+    metadata = {
+        'problem': 'Something that hte user asked',
+        'hyde': 'The generated response from the LLM',
+        'grounded': 'The grounded response using supporting/semantically similar documents',
+        'sequences': [{'name': 'Test', 'steps': ['a', 'b', 'c']}]
+    }
+
+    # create new record for usage
+    log_use(client, TEST_UID, metadata=metadata)
