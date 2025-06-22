@@ -173,10 +173,13 @@ def solve(
     try:
         extracted: list[Sequence] = extract_sequences(client=gemini, paragraph=grounded.text).parsed
     
+        flattened: list[dict] = [sequence.model_dump() for sequence in extracted]
+
         # iterate over parsed sequences and dump into dict
         # for passing back into model as json string
-        sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
+        sequences: str = json.dumps(flattened)
     
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -227,8 +230,21 @@ def solve(
         flowchart.name = grounded.name
     """
 
+    # Setup the metadata with pipeline's data above
+    # this is passed to the log_use func and stored in DB for reference
+    metadata:dict = {
+        'problem': query.problem,
+        'hyde': hypothetical,
+        'grounded': grounded.text,
+        'sequences': flattened,
+    }
+
+    # If response and graph was successfully generated
+    # increment the usage count before returning response to the user
+    log_use(client=supabase, userid=query.user_id, metadata=metadata)
+
     # Return generated directed graph/flowchart to the user
-    # FastAPI automatically dumps the model as JSON
+    # FastAPI automatically dumps the response model obj as JSON
     return flowchart
 
 
