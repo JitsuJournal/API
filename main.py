@@ -111,8 +111,8 @@ def solve(
 
     # Before processing the request,
     # we first check if the user is within their rate limit
-    used = get_usage(supabase, query.user_id)
-    limit = get_user_limit(supabase, query.user_id)
+    used: int = get_usage(supabase, query.user_id)
+    limit: int = get_user_limit(supabase, query.user_id)
     if not used<limit:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
