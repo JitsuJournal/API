@@ -108,11 +108,17 @@ def usage(
     other db.py services to calculate and return the users usage limit,
     used count, and boolean indicating whether or not they can use the askai feature.
     """
-    # TODO: Handle edge condition of missing or invalid user_id 
-    # by catching DB error and returning a valid error HTTPException status code
-    used: int = get_usage(supabase, user_id)
-    limit: int = get_user_limit(supabase, user_id)
-    allowed: bool = used<limit
+    try:
+        used: int = get_usage(supabase, user_id)
+        limit: int = get_user_limit(supabase, user_id)
+        allowed: bool = used<limit
+    except Exception as e:
+        # Handle edge condition of missing or invalid user_id 
+        # by catching DB error and returning a valid error HTTPException status code
+        if 'invalid input syntax for type uuid' in e.message:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Please use a valid user_id")
+        else:
+            raise HTTPException(status.HTTP_424_FAILED_DEPENDENCY, detail="Unexpected error")
 
     return {'limit': limit, 'used': used, 'allowed': allowed}
 
