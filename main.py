@@ -96,6 +96,26 @@ def test():
     }
     return Graph(**data)
 
+# Endpoint for returning a given user_id's usage data
+# with boolean vaue determining whether or not they can use the ask ai feature
+@app.get("/usage/{user_id}")
+def usage(
+        user_id:str,
+        supabase: Annotated[DbClient, Depends(conn_supabase)]
+    ):
+    """
+    Given a user's UUID, use the injected supabase dependancy and 
+    other db.py services to calculate and return the users usage limit,
+    used count, and boolean indicating whether or not they can use the askai feature.
+    """
+    # TODO: Handle edge condition of missing or invalid user_id 
+    # by catching DB error and returning a valid error HTTPException status code
+    used: int = get_usage(supabase, user_id)
+    limit: int = get_user_limit(supabase, user_id)
+    allowed: bool = used<limit
+
+    return {'limit': limit, 'used': used, 'allowed': allowed}
+
 # Actual endpoint for processing a given user problem
 @app.post('/solve/', response_model=Graph)
 def solve(

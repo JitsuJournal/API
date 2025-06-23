@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class UserQuery(BaseModel): # Model 
-    user_id: str
+class UserQuery(BaseModel):
+    user_id: str #UUID maps with Supabase
     problem: str
 
 class Sequence(BaseModel):
