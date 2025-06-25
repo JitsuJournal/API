@@ -1,13 +1,12 @@
-# TODO: Handle any errors in the middle, passing msgs w/ appropriate error codes)
 # System
 import json
 from typing import Annotated
 # Local
-from src.models.general import Sequence, Graph
+from src.models.general import UserQuery, Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
-from src.services.db import conn_supabase, similarity_search, get_techniques
+from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
-import uvicorn
+# import uvicorn # NOTE: Commented out for production
 from fastapi import FastAPI, Depends, HTTPException, status, Body
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
@@ -35,8 +34,8 @@ app.add_middleware(
 async def root():
     return {"message": "Hello world"}
 
-@app.get('/test', response_model=Graph)
-def test():
+@app.get('/sample', response_model=Graph)
+def sample():
     """
     Endpoint that returns a basic list of nodes with technique ID
     and edges that reference the nodes as source/target using ID's,
@@ -96,12 +95,36 @@ def test():
     }
     return Graph(**data)
 
+# Endpoint for returning a given user_id's usage data
+# with boolean vaue determining whether or not they can use the ask ai feature
+@app.get("/usage/{user_id}")
+def usage(
+        user_id:str,
+        supabase: Annotated[DbClient, Depends(conn_supabase)]
+    ):
+    """
+    Given a user's UUID, use the injected supabase dependancy and 
+    other db.py services to calculate and return the users usage limit,
+    used count, and boolean indicating whether or not they can use the askai feature.
+    """
+    try:
+        used: int = get_usage(supabase, user_id)
+        limit: int = get_user_limit(supabase, user_id)
+        allowed: bool = used<limit
+    except Exception as e:
+        # Handle edge condition of missing or invalid user_id 
+        # by catching DB error and returning a valid error HTTPException status code
+        if 'invalid input syntax for type uuid' in e.message:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Please use a valid user_id")
+        else:
+            raise HTTPException(status.HTTP_424_FAILED_DEPENDENCY, detail="Unexpected error")
+
+    return {'limit': limit, 'used': used, 'allowed': allowed}
+
 # Actual endpoint for processing a given user problem
-# NOTE/TODO: Convert to a PUT request to ensure we can send large length
-# problems with any special character as required without breaking URL
-@app.post('/solve/', response_model=Graph)#, response_model=Reactflow)
+@app.post('/solve/', response_model=Graph)
 def solve(
-        problem: Annotated[str, Body()],
+        query: Annotated[UserQuery, Body()],
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
         supabase: Annotated[DbClient, Depends(conn_supabase)],
     ):
@@ -110,9 +133,21 @@ def solve(
     return a jitsu-journal friendly directed graph/flowchart.
     Passed into the app for creating initial nodes and edges.
     """
+
+    # Before processing the request,
+    # we first check if the user is within their rate limit
+    used: int = get_usage(supabase, query.user_id)
+    limit: int = get_user_limit(supabase, query.user_id)
+    if not used<limit:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f'Usage limit exceeded for the current period.'
+        )
+
+
     try:
         # Create a hypothetical solution using the users problem
-        hypothetical: str = create_paragraph(gemini, problem).text
+        hypothetical: str = create_paragraph(gemini, query.problem).text
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -150,7 +185,7 @@ def solve(
     # Use top-k records in similar
     # to gound the hypothetical result
     try:
-        grounded = ground(client=gemini, problem=problem, 
+        grounded = ground(client=gemini, problem=query.problem, 
                         solution=hypothetical, similar=paragraphs)
     except Exception as e:
         raise HTTPException(
@@ -163,10 +198,13 @@ def solve(
     try:
         extracted: list[Sequence] = extract_sequences(client=gemini, paragraph=grounded.text).parsed
     
+        flattened: list[dict] = [sequence.model_dump() for sequence in extracted]
+
         # iterate over parsed sequences and dump into dict
         # for passing back into model as json string
-        sequences: str = json.dumps([sequence.model_dump() for sequence in extracted])
+        sequences: str = json.dumps(flattened)
     
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -217,10 +255,27 @@ def solve(
         flowchart.name = grounded.name
     """
 
+    # Setup the metadata with pipeline's data above
+    # this is passed to the log_use func and stored in DB for reference
+    metadata:dict = {
+        'problem': query.problem,
+        'hyde': hypothetical,
+        'grounded': grounded.text,
+        'sequences': flattened,
+    }
+
+    # If response and graph was successfully generated
+    # increment the usage count before returning response to the user
+    log_use(client=supabase, userid=query.user_id, metadata=metadata)
+
     # Return generated directed graph/flowchart to the user
-    # FastAPI automatically dumps the model as JSON
+    # FastAPI automatically dumps the response model obj as JSON
     return flowchart
 
 
+"""
+# NOTE: Commented out driver code to avoid collisions 
+# with production env. Can be uncommeneted when testing.
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+"""

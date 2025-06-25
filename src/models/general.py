@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class UserQuery(BaseModel):
+    user_id: str #UUID maps with Supabase
+    problem: str
+
 class Sequence(BaseModel):
     name: str
     steps: list[str]
