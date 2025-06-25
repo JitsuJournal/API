@@ -18,8 +18,9 @@ app = FastAPI()
 
 
 origins = [
-    # TODO: Include production front-end URL
     "http://localhost:5173",
+    "https://www.jitsujournal.com/",
+    "https://jitsujournal.onrender.com/"
 ]
 
 app.add_middleware(
