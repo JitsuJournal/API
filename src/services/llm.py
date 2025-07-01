@@ -114,7 +114,7 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
-            temperature=0.5
+            temperature=0.25
         ),
         contents=[techniques, sequences, problem,
             """
@@ -148,7 +148,7 @@ def rename_add_notes(client: genai.Client, flowchart: str,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
-            temperature=0.75
+            temperature=0.5
         ),
         contents=[
             flowchart, techniques, 
