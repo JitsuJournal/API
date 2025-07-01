@@ -132,15 +132,28 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
                 - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
             - No duplicate edges: each `source`-`target` pair must appear only once
-            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
-
-            After creating the graph:
-            - Create rich edge notes with information and coaching tips from the provided sequences
-            - Edge notes should be explaining the sequence path, techniques, position, and transition (max 350 char)
-            - Generate a meaningful name for the graph in under 20 char to capture it's purpose
+            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.            
             """]
     )
     return flowchart
+
+
+def name_and_notes(client: genai.Client, flowchart: str, 
+        sequences:str, similar:str, techniques: str
+    ):
+    """
+    Given the flowchart, list of techinques,
+    sequence in text form, and paragraphs 
+    of other similar sequences;
+
+    - Create a unique and meaningful name in under 30 characters
+    - Create notes for each edge, adding details not captured by the nodes
+    - The notes can use text from provided paragraphs
+    """
+    # NOTE: Use a smaller model
+
+    return
+
 
 if __name__=="__main__":
     import json
@@ -149,7 +162,6 @@ if __name__=="__main__":
     client = conn_gemini()
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
     solution = create_paragraph(client, problem) # NOTE: Need to switch to stronger model
-    print(solution.text)
 
     # Initialize supabase client
     supabase = conn_supabase()
@@ -167,7 +179,7 @@ if __name__=="__main__":
             'paragraph': sequence['content']
         } for sequence in results.data]
     )
-    
+
     # Ground the generated response using similar sequences
     # from actual youtube tutorials and coaches
     grounded = ground(client=client, problem=problem, 
@@ -189,5 +201,18 @@ if __name__=="__main__":
     # or duplicates, which would be the APIs response
     flowchart: Graph = create_flowchart(client, sequences, techniques).parsed
 
+
+    # Pass the flowchart back to the model
+    # along with the techniques, similar sequences 
+    # and extracted grounded sequences
+    # to generate a name w/ updated/refined notes
+    final: Graph = name_and_notes(
+        client=client,
+        flowchart=flowchart.model_dump_json(),
+        sequences=sequences, similar=similar,
+        techniques=techniques,
+    )
+
     print('-'*15)
-    print(flowchart.model_dump_json(indent=2))
+    #print(flowchart.model_dump_json(indent=2))
+    print(final.model_dump_json(indent=2))
