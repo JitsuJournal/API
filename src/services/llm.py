@@ -137,22 +137,36 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
     )
     return flowchart
 
-
-def name_and_notes(client: genai.Client, flowchart: str, 
+def rename_add_notes(client: genai.Client, flowchart: str, 
         sequences:str, similar:str, techniques: str
-    ):
+    ) :
     """
-    Given the flowchart, list of techinques,
-    sequence in text form, and paragraphs 
-    of other similar sequences;
-
-    - Create a unique and meaningful name in under 30 characters
-    - Create notes for each edge, adding details not captured by the nodes
-    - The notes can use text from provided paragraphs
+    Given the flowchart, list of techinques, sequence in text form, and paragraphs 
+    of other similar sequences. Rename the flowchart and create detailed notes.
     """
-    # NOTE: Use a smaller model
-
-    return
+    renamed = client.models.generate_content(
+        model="gemini-2.0-flash",
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=Graph,
+            temperature=0.75
+        ),
+        contents=[
+            flowchart, techniques, 
+            sequences, similar,
+            """
+            Given the following flowchart which is a directed graph along with a
+            list of techniques, the original, and the similar sequences paragraphs:
+                - Analyze the sequence and rename the flowchart (max 30 characters).
+                - The name should be meaningful and based on the sequences underlying solution.
+                - Name should not be vauage or generalized.
+                - Create notes (max 400 characters each) that add detail.
+                - Notes should help practitioners understand how to execute the sequence.
+                - Notes should contain text from the similar and original sequence in text.
+            """
+        ]
+    )
+    return renamed
 
 
 if __name__=="__main__":
@@ -201,18 +215,17 @@ if __name__=="__main__":
     # or duplicates, which would be the APIs response
     flowchart: Graph = create_flowchart(client, sequences, techniques).parsed
 
-
     # Pass the flowchart back to the model
     # along with the techniques, similar sequences 
     # and extracted grounded sequences
     # to generate a name w/ updated/refined notes
-    final: Graph = name_and_notes(
+    renamed: Graph = rename_add_notes(
         client=client,
         flowchart=flowchart.model_dump_json(),
         sequences=sequences, similar=similar,
         techniques=techniques,
-    )
+    ).parsed
 
+    
     print('-'*15)
-    #print(flowchart.model_dump_json(indent=2))
-    print(final.model_dump_json(indent=2))
+    print(renamed.model_dump_json(indent=2))
