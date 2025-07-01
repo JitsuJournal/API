@@ -118,11 +118,8 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
         ),
         contents=[techniques, sequences,
             """
-            Given different jiu-jitsu sequences that solves a practitioners 
-            problem, ignore duplicates, and create a single directed graph
-            that merges the most important sequences steps with branching where appropriate.
-            Make sure you select the sequences with best probability of success without
-            overwhelming the practitioner with too many options (max 10 nodes)
+            Your task is to analyze the provided jiu-jitsu `sequences` 
+            and merge them into a single, compact, directed graph.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
@@ -131,8 +128,9 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
                 - `id`: the node ID
                 - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
-            - No duplicate edges: each `source`-`target` pair must appear only once
-            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.            
+            - Create branches where the paths diverge.
+            - Eliminate duplicate steps and pathways to create a single, connected graph.
+            - The final graph must not exceed 8 nodes. If the merged sequences create more than 8 nodes, prioritize the most common techniques and pathways, pruning the less frequent ones.
             """]
     )
     return flowchart
@@ -158,8 +156,7 @@ def rename_add_notes(client: genai.Client, flowchart: str,
             Given the following flowchart which is a directed graph along with a
             list of techniques, the original, and the similar sequences paragraphs:
                 - Analyze the sequence and rename the flowchart (max 30 characters).
-                - The name should be meaningful and based on the sequences underlying solution.
-                - Name should not be vauage or generalized.
+                - The name should be based on the sequences underlying solution.
                 - Create notes (max 400 characters each) that add detail.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
