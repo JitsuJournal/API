@@ -102,7 +102,7 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
     )
     return response
 
-def create_flowchart(client: genai.Client, sequences: str, techniques: str):
+def create_flowchart(client: genai.Client, problem: str, sequences: str, techniques: str):
     """
     Given sequences and techniques as a JSON str,
     return a Graph object containing a list of nodes and edges.
@@ -114,30 +114,31 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
-            temperature=0.25
+            temperature=0.5
         ),
-        contents=[techniques, sequences,
+        contents=[techniques, sequences, problem,
             """
             Your task is to analyze the provided jiu-jitsu `sequences` 
             and merge them into a single, compact, directed graph.
+            Prioritize the techniques and pathways relevant to the given user problem.
+            The final graph must not exceed 10 nodes.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
-            - Each node should be assigned a unique node ID (e.g. 1, 2, etc.)
+            - Each node should be assigned a unique node ID (e.g. 1, 2, 3, etc.)
             - Each node must include:
                 - `id`: the node ID
                 - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
             - Create branches where the paths diverge.
-            - Eliminate duplicate steps and pathways to create a single, connected graph.
-            - The final graph must not exceed 8 nodes. If the merged sequences create more than 8 nodes, prioritize the most common techniques and pathways, pruning the less frequent ones.
+            - Eliminate duplicate steps and pathways.
             """]
     )
     return flowchart
 
 def rename_add_notes(client: genai.Client, flowchart: str, 
         sequences:str, similar:str, techniques: str
-    ) :
+    ):
     """
     Given the flowchart, list of techinques, sequence in text form, and paragraphs 
     of other similar sequences. Rename the flowchart and create detailed notes.
@@ -157,7 +158,7 @@ def rename_add_notes(client: genai.Client, flowchart: str,
             list of techniques, the original, and the similar sequences paragraphs:
                 - Analyze the sequence and rename the flowchart (max 30 characters).
                 - The name should be based on the sequences underlying solution.
-                - Create notes (max 400 characters each) that add detail.
+                - Create notes (max 400 characters each) that add detail to the edges and related nodes.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
             """
@@ -210,7 +211,7 @@ if __name__=="__main__":
     # pass sequences and techniques to model
     # and create a flowchart without inconsistencies
     # or duplicates, which would be the APIs response
-    flowchart: Graph = create_flowchart(client, sequences, techniques).parsed
+    flowchart: Graph = create_flowchart(client, problem, sequences, techniques).parsed
 
     # Pass the flowchart back to the model
     # along with the techniques, similar sequences 

@@ -223,8 +223,8 @@ def solve(
     try:
         # Use grounded steps with retrieved techniques
         # and create a basic lightweight directed graph
-        flowchart: Graph = create_flowchart(client=gemini, sequences=sequences,
-                                            techniques=techniques).parsed
+        flowchart: Graph = create_flowchart(client=gemini, problem=query.problem,
+                                            sequences=sequences, techniques=techniques).parsed
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -255,7 +255,7 @@ def solve(
         renamed: Graph = rename_add_notes(
             client=gemini, flowchart=flowchart.model_dump_json(),
             sequences=sequences, similar=paragraphs,
-            techniques=techniques 
+            techniques=techniques
         ).parsed
     except Exception as e:
         raise HTTPException(
