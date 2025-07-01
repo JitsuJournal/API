@@ -158,9 +158,10 @@ def rename_add_notes(client: genai.Client, flowchart: str,
             list of techniques, the original, and the similar sequences paragraphs:
                 - Analyze the sequence and rename the flowchart (max 30 characters).
                 - The name should be based on the sequences underlying solution.
-                - Create notes (max 400 characters each) that add detail to the edges and related nodes.
+                - Recreate notes (max 400 characters each) that add detail to the edges and related nodes.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
+                - Notes can be phrased/framed like a coach teaching a student (the user).
             """
         ]
     )
