@@ -138,7 +138,7 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
     )
     return flowchart
 
-def rename_add_notes(client: genai.Client, flowchart: str, 
+def rename_add_notes(client: genai.Client, problem: str, flowchart: str, 
         sequences:str, similar:str, techniques: str
     ):
     """
@@ -153,13 +153,13 @@ def rename_add_notes(client: genai.Client, flowchart: str,
             temperature=0.75
         ),
         contents=[
-            flowchart, techniques, 
+            problem, flowchart, techniques, 
             sequences, similar,
             """
             Given the following flowchart which is a directed graph along with a
             list of techniques, the original, and the similar sequences paragraphs:
                 - Analyze the sequence and rename the flowchart (max 30 characters).
-                - The name should be based on the sequences underlying solution.
+                - The name should be based on the problem, flowchart and its underlying sequences solutions.
                 - Recreate notes (max 400 characters each) that add detail to the edges and related nodes.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
@@ -220,7 +220,7 @@ if __name__=="__main__":
     # and extracted grounded sequences
     # to generate a name w/ updated/refined notes
     renamed: Graph = rename_add_notes(
-        client=client,
+        client=client, problem=problem,
         flowchart=flowchart.model_dump_json(),
         sequences=sequences, similar=similar,
         techniques=techniques,
