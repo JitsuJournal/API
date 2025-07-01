@@ -125,6 +125,7 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
+            - 'Top' and 'bottom' indicate attacker/defender roles
             - Each node should be assigned a unique node ID (e.g. 1, 2, 3, etc.)
             - Each node must include:
                 - `id`: the node ID
