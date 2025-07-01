@@ -102,7 +102,7 @@ def extract_sequences(client: genai.Client, paragraph: str, single: bool=False):
     )
     return response
 
-def create_flowchart(client: genai.Client, sequences: str, techniques: str):
+def create_flowchart(client: genai.Client, problem: str, sequences: str, techniques: str):
     """
     Given sequences and techniques as a JSON str,
     return a Graph object containing a list of nodes and edges.
@@ -116,31 +116,57 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
             response_schema=Graph,
             temperature=0.25
         ),
-        contents=[techniques, sequences,
+        contents=[techniques, sequences, problem,
             """
-            Given different jiu-jitsu sequences that solves a practitioners 
-            problem, ignore duplicates, and create a single directed graph
-            that merges the most important sequences steps with branching where appropriate.
-            Make sure you select the sequences with best probability of success without
-            overwhelming the practitioner with too many options (max 10 nodes)
+            Your task is to analyze the provided jiu-jitsu `sequences` 
+            and merge them into a single, compact, directed graph.
+            Prioritize the techniques and pathways relevant to the given user problem.
+            The final graph must not exceed 10 nodes and should only contain 1 root node.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
-            - Each node should be assigned a unique node ID (e.g. 1, 2, etc.)
+            - 'Top' and 'bottom' denote attacker and defender roles respectively within each position.
+            - Each node should be assigned a unique node ID (e.g. 1, 2, 3, etc.)
             - Each node must include:
                 - `id`: the node ID
-                - `techinque_id`: ID from the provided technique list            
+                - `techinque_id`: ID from the provided technique list   
             - Each edge should connect `source` to `target` using node IDs
-            - No duplicate edges: each `source`-`target` pair must appear only once
-            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.
-
-            After creating the graph:
-            - Create rich edge notes with information and coaching tips from the provided sequences
-            - Edge notes should be explaining the sequence path, techniques, position, and transition (max 350 char)
-            - Generate a meaningful name for the graph in under 20 char to capture it's purpose
+            - Create branches where the paths diverge.
+            - Eliminate duplicate steps and pathways.
             """]
     )
     return flowchart
+
+def rename_add_notes(client: genai.Client, problem: str, flowchart: str, 
+        sequences:str, similar:str, techniques: str
+    ):
+    """
+    Given the flowchart, list of techinques, sequence in text form, and paragraphs 
+    of other similar sequences. Rename the flowchart and create detailed notes.
+    """
+    renamed = client.models.generate_content(
+        model="gemini-2.0-flash",
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=Graph,
+            temperature=0.75
+        ),
+        contents=[
+            problem, flowchart, techniques, 
+            sequences, similar,
+            """
+            Given the following flowchart which is a directed graph along with a
+            list of techniques, the original, and the similar sequences paragraphs:
+                - Analyze the sequence and rename the flowchart (max 30 characters).
+                - The name should be based on the problem, flowchart and its underlying sequences solutions.
+                - Recreate notes (max 400 characters each) that add detail to the edges and related nodes.
+                - Notes should help practitioners understand how to execute the sequence.
+                - Notes should contain text from the similar and original sequence in text.
+            """
+        ]
+    )
+    return renamed
+
 
 if __name__=="__main__":
     import json
@@ -149,7 +175,6 @@ if __name__=="__main__":
     client = conn_gemini()
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
     solution = create_paragraph(client, problem) # NOTE: Need to switch to stronger model
-    print(solution.text)
 
     # Initialize supabase client
     supabase = conn_supabase()
@@ -167,7 +192,7 @@ if __name__=="__main__":
             'paragraph': sequence['content']
         } for sequence in results.data]
     )
-    
+
     # Ground the generated response using similar sequences
     # from actual youtube tutorials and coaches
     grounded = ground(client=client, problem=problem, 
@@ -187,7 +212,19 @@ if __name__=="__main__":
     # pass sequences and techniques to model
     # and create a flowchart without inconsistencies
     # or duplicates, which would be the APIs response
-    flowchart: Graph = create_flowchart(client, sequences, techniques).parsed
+    flowchart: Graph = create_flowchart(client, problem, sequences, techniques).parsed
 
+    # Pass the flowchart back to the model
+    # along with the techniques, similar sequences 
+    # and extracted grounded sequences
+    # to generate a name w/ updated/refined notes
+    renamed: Graph = rename_add_notes(
+        client=client, problem=problem,
+        flowchart=flowchart.model_dump_json(),
+        sequences=sequences, similar=similar,
+        techniques=techniques,
+    ).parsed
+
+    
     print('-'*15)
-    print(flowchart.model_dump_json(indent=2))
+    print(renamed.model_dump_json(indent=2))

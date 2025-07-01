@@ -3,10 +3,10 @@ import json
 from typing import Annotated
 # Local
 from src.models.general import UserQuery, Sequence, Graph
-from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart
+from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart, rename_add_notes
 from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
-# import uvicorn # NOTE: Commented out for production
+import uvicorn # NOTE: Commented out for production
 from fastapi import FastAPI, Depends, HTTPException, status, Body
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
@@ -145,7 +145,6 @@ def solve(
             detail=f'Usage limit exceeded for the current period.'
         )
 
-
     try:
         # Create a hypothetical solution using the users problem
         hypothetical: str = create_paragraph(gemini, query.problem).text
@@ -165,7 +164,7 @@ def solve(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail=f'Failed to embedd. Error: {str(e)}'
         )
-
+    
     try:
         # Retrive similar records to the generated solution from Supabase
         # NOTE: Using default match threshold and count for searching
@@ -204,8 +203,6 @@ def solve(
         # iterate over parsed sequences and dump into dict
         # for passing back into model as json string
         sequences: str = json.dumps(flattened)
-    
-
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -226,8 +223,8 @@ def solve(
     try:
         # Use grounded steps with retrieved techniques
         # and create a basic lightweight directed graph
-        flowchart: Graph = create_flowchart(client=gemini, sequences=sequences,
-                                            techniques=techniques).parsed
+        flowchart: Graph = create_flowchart(client=gemini, problem=query.problem,
+                                            sequences=sequences, techniques=techniques).parsed
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
@@ -249,12 +246,23 @@ def solve(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             detail='No edges generated.'
         )
-    """
-    else:
-        # Update the flowchart names to use the grounded solution
-        # preserving more verbose content/clarity
-        flowchart.name = grounded.name
-    """
+    
+    
+    # If flowchart was created successfully without errors
+    # We pass the flowchart back into a model to 
+    # Update the flowchart names and notes
+    try:
+        renamed: Graph = rename_add_notes(
+            client=gemini, problem=query.problem,
+            flowchart=flowchart.model_dump_json(),
+            sequences=sequences, similar=paragraphs,
+            techniques=techniques
+        ).parsed
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            detail=f'Failed to rename flowchart and create notes: {str(e)}'
+        )
 
     # Setup the metadata with pipeline's data above
     # this is passed to the log_use func and stored in DB for reference
@@ -271,12 +279,12 @@ def solve(
 
     # Return generated directed graph/flowchart to the user
     # FastAPI automatically dumps the response model obj as JSON
-    return flowchart
+    return renamed
 
 
-"""
+#"""
 # NOTE: Commented out driver code to avoid collisions 
 # with production env. Can be uncommeneted when testing.
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-"""
+#"""
