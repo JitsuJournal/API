@@ -253,7 +253,8 @@ def solve(
     # Update the flowchart names and notes
     try:
         renamed: Graph = rename_add_notes(
-            client=gemini, flowchart=flowchart.model_dump_json(),
+            client=gemini, problem=query.problem,
+            flowchart=flowchart.model_dump_json(),
             sequences=sequences, similar=paragraphs,
             techniques=techniques
         ).parsed
