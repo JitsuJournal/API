@@ -148,7 +148,7 @@ def rename_add_notes(client: genai.Client, flowchart: str,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=Graph,
-            temperature=0.5
+            temperature=0.75
         ),
         contents=[
             flowchart, techniques, 
@@ -161,7 +161,6 @@ def rename_add_notes(client: genai.Client, flowchart: str,
                 - Recreate notes (max 400 characters each) that add detail to the edges and related nodes.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
-                - Notes can be phrased/framed like a coach teaching a student (the user).
             """
         ]
     )
