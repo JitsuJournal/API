@@ -132,14 +132,15 @@ def create_flowchart(client: genai.Client, sequences: str, techniques: str):
                 - `techinque_id`: ID from the provided technique list            
             - Each edge should connect `source` to `target` using node IDs
             - No duplicate edges: each `source`-`target` pair must appear only once
-            - Every node must be connected by at least one edge (either as a source or a target); no disconnected nodes.            
+            - Every node must be connected by at least one edge (either as a source or a target); 
+            - No disconnected nodes or isolated subgraphs, and no cycles or cyclic graph
             """]
     )
     return flowchart
 
 def rename_add_notes(client: genai.Client, flowchart: str, 
         sequences:str, similar:str, techniques: str
-    ) :
+    ):
     """
     Given the flowchart, list of techinques, sequence in text form, and paragraphs 
     of other similar sequences. Rename the flowchart and create detailed notes.
@@ -163,6 +164,7 @@ def rename_add_notes(client: genai.Client, flowchart: str,
                 - Create notes (max 400 characters each) that add detail.
                 - Notes should help practitioners understand how to execute the sequence.
                 - Notes should contain text from the similar and original sequence in text.
+                - DON'T MODIFY NODES OR EDGES THEMSEVLES. NO NEW OR DELETED NODES/EDGES.
             """
         ]
     )
