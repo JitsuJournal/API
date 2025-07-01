@@ -120,9 +120,8 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
             """
             Your task is to analyze the provided jiu-jitsu `sequences` 
             and merge them into a single, compact, directed graph.
-            Keep only one root node and prioritize the techniques 
-            and pathways relevant to the given user problem.
-            The final graph must not exceed 10 nodes.
+            Prioritize the techniques and pathways relevant to the given user problem.
+            The final graph must not exceed 10 nodes and should only contain 1 root node.
 
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
