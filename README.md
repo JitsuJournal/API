@@ -26,6 +26,8 @@ Model choices
 ## API
 Implemented the API/HTTP layer using Fast API. It's simple interface makes it the best option for minimizing boiler plate code. The Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem. Response models and request body parameters are type safed using PyDantic models.
 
+Render's platform and tooling for web services is being used for hosting.
+
 ## Auth
 To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
 
@@ -37,8 +39,17 @@ UUID's are not required for contributing to the LLM pipeline, read setup instruc
 ```
 // API request from client-side/front-end 
 // you can also use tools like postman for sending a request
+
+import axios from 'axios';
+
+const response = await axios.post(
+    `https://api-g5to.onrender.com/solve/`,
+    {user_id, problem}
+);
 ```
 ### Output
+```
+```
 ## LLM Service
 
 
