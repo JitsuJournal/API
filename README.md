@@ -128,20 +128,16 @@ Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly get
 ### Input
 ```
 # .env file
-GEMINI_CLIENT = 'YOUR_KEY'
+GEMINI = 'YOUR_GEMINI_KEY'
 ```
 ```
-from Gemini import conn_gemini, generate_hypothetical, 
-from Models import Solution
+from src.services.llm import conn_gemini, create_paragraph
 
 # After setting gemini key in .env
-client = conn_gemini()
+gemini = conn_gemini()
 
-problem: str = ""
-response: Solution = generate_hypothetical(
-    client=client,
-    problem=problem
-)
+problem: str = "Some jiu jitsu problem"
+response: str = create_paragraph(gemini, problem).text
 
 print(response)
 ```
