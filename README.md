@@ -17,6 +17,7 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 - Step 5: Rename sequence and recreate notes using the directed-graph and retrieved/generated sequences.
 
 [1] [Gao, Luyu, et al. "Precise zero-shot dense retrieval without relevance labels." Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). 2023.](https://arxiv.org/abs/2212.10496)
+
 [2] [Lewis, Patrick, et al. "Retrieval-augmented generation for knowledge-intensive nlp tasks." Advances in neural information processing systems 33 (2020): 9459-9474.](https://arxiv.org/abs/2005.11401)
 
 # Architecture
