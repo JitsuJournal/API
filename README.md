@@ -19,18 +19,17 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 ## Database
 Supabase[link] and PostgreSQL[link] were used as the primary persistent data store. In addition to maintaing a table with the techniques, PostgreSQL's vector store mode is also used for storing the embededed youtube tutorials sequences and perform similarity search.
 
-## Auth
-To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
-
-UUID's are not required for contributing to the LLM pipeline, read setup instruction below.
+## API
+Fast API endpoints and setup with PyDantic models for type safe
 
 ## AI
 Structured outputs
 Model choices
 
-## API
-Fast API endpoints and setup with PyDantic models for type safe
+## Auth
+To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
 
+UUID's are not required for contributing to the LLM pipeline, read setup instruction below.
 
 # Sample
 ## Input
