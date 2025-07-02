@@ -126,10 +126,30 @@ Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly get
 
 ## LLM Service
 ### Input
+```
+# .env file
+GEMINI_CLIENT = 'YOUR_KEY'
+```
+```
+from Gemini import conn_gemini, generate_hypothetical, 
+from Models import Solution
 
+# After setting gemini key in .env
+client = conn_gemini()
+
+problem: str = ""
+response: Solution = generate_hypothetical(
+    client=client,
+    problem=problem
+)
+
+print(response)
+```
 ### Output
-
-
+```
+# Pull from the logged responses
+# Don't even need to regenerate
+```
 
 # Contribution Guide
 
