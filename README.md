@@ -15,7 +15,7 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 [2] Link/Paper in MLA
 [3] Link/Paper in MLA
 
-# Infrastructure
+# Architecture
 
 
 ## Database
