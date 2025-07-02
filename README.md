@@ -1,5 +1,5 @@
 # JitsuJournal API
-LLM pipeline for generating jiu-jitsu sequences given a users problem (i.e. problem/query). Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
+LLM based API for generating jiu-jitsu sequences given a users problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
 
 # AI/LLM Pipeline
 ## Diagram
@@ -16,12 +16,13 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 [3] Link/Paper in MLA
 
 # Architecture
-
-
 ## Database
+Supabase[link] and PostgreSQL[link] were used as the primary persistent data store. In addition to maintaing a table with the techniques, PostgreSQL's vector store mode is also used for storing the embededed youtube tutorials sequences and perform similarity search.
 
-## Auth 
-Go over loguse and alternatives to use without that when dev, setup of dev env is expanded on more below
+## Auth
+To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
+
+UUID's are not required for contributing to the LLM pipeline, read setup instruction below.
 
 ## AI
 Structured outputs
