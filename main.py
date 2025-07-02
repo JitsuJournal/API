@@ -6,7 +6,7 @@ from src.models.general import UserQuery, Sequence, Graph
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart, rename_add_notes
 from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
-import uvicorn # NOTE: Commented out for production
+# import uvicorn # NOTE: Commented out for production
 from fastapi import FastAPI, Depends, HTTPException, status, Body
 from google.genai import Client as LlmClient
 from supabase import Client as DbClient
@@ -282,9 +282,9 @@ def solve(
     return renamed
 
 
-#"""
+"""
 # NOTE: Commented out driver code to avoid collisions 
 # with production env. Can be uncommeneted when testing.
 if __name__=="__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-#"""
+"""
