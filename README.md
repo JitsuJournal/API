@@ -12,13 +12,12 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 
 - Step 1: Generate a jiu-jitsu sequence as the solution to a users problem/prompt [1]
 - Step 2: Use the generated sequence to perform a similarity search and retrieve sequences from real youtube tutorials [2]
-- Step 3: Use the retrieved sequences to ground the generated solution, increasing correctness [3]
+- Step 3: Use the retrieved sequences to ground the generated solution, increasing correctness
 - Step 4: Breakdown grounded sequence into steps and convert into a react-flow like direct-graph data-structure
 - Step 5: Rename sequence and recreate notes using the directed-graph and retrieved/generated sequences.
 
-[1] Link/Paper in MLA
-[2] Link/Paper in MLA
-[3] Link/Paper in MLA
+[1] [Gao, Luyu, et al. "Precise zero-shot dense retrieval without relevance labels." Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). 2023.](https://arxiv.org/abs/2212.10496)
+[2] [Lewis, Patrick, et al. "Retrieval-augmented generation for knowledge-intensive nlp tasks." Advances in neural information processing systems 33 (2020): 9459-9474.](https://arxiv.org/abs/2005.11401)
 
 # Architecture
 
