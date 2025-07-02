@@ -67,10 +67,32 @@ const response = await axios.post(
 ### Output
 
 ```
+// Catch and handle any error,
+// Recommened: Implement your own error handling logic
 
+if (response.error) {
+    throw new Error('');
+}
+
+// If no errors encountered,
+// output the results to the console/terminal
+console.log(response.data);
 ```
+```
+{
+    name:
+    nodes: 
+    edges:
+}
+```
+Note: Send a GET request to jitsujournal.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ## LLM Service
+### Input
+
+### Output
+
+
 
 # Contribution Guide
 
