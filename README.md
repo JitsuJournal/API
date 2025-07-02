@@ -32,8 +32,14 @@ To facilitate rate limiting for API endpoints, we use UUID's generated when user
 UUID's are not required for contributing to the LLM pipeline, read setup instruction below.
 
 # Sample
-## Input
-## Output
+## API Request
+### Input
+```
+// API request from client-side/front-end 
+// you can also use tools like postman for sending a request
+```
+### Output
+## LLM Service
 
 
 # Contribution Guide
