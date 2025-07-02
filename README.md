@@ -17,14 +17,14 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 
 # Architecture
 ## Database
-Supabase[link] and PostgreSQL[link] were used as the primary persistent data store. In addition to maintaing a table with the techniques, PostgreSQL's vector store mode is also used for storing the embededed youtube tutorials sequences and perform similarity search.
-
-## API
-Fast API endpoints and setup with PyDantic models for type safe
+Supabase[link] and PostgreSQL[link] is being used as the primary persistent data store. In addition to maintaing a table with the techniques, PostgreSQL's vector store mode is also used for storing the embededed youtube tutorials sequences and perform similarity search.
 
 ## AI
 Structured outputs
 Model choices
+
+## API
+Implemented the API/HTTP layer using Fast API. It's simple interface makes it the best option for minimizing boiler plate code. The Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem. Response models and request body parameters are type safed using PyDantic models.
 
 ## Auth
 To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
