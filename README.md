@@ -51,7 +51,6 @@ UUID's are not required for contributing to the LLM pipeline, read setup instruc
 ## API Request
 
 ### Input
-
 ```
 // API request from client-side/front-end 
 // you can also use tools like postman for sending a request
@@ -65,27 +64,65 @@ const response = await axios.post(
 ```
 
 ### Output
-
 ```
-// Catch and handle any error,
 // Recommened: Implement your own error handling logic
-
-if (response.error) {
-    throw new Error('');
-}
-
-// If no errors encountered,
-// output the results to the console/terminal
+// If no errors, print results
 console.log(response.data);
 ```
 ```
 {
-    name:
-    nodes: 
-    edges:
+    "name": "Mount Attack Sequence",
+    "nodes": [
+        {
+        "id": 1,
+        "technique_id": 3
+        },
+        {
+        "id": 2,
+        "technique_id": 31
+        },
+        {
+        "id": 3,
+        "technique_id": 32
+        },
+        {
+        "id": 5,
+        "technique_id": 25
+        },
+        {
+        "id": 6,
+        "technique_id": 32
+        }
+    ],
+    "edges": [
+        {
+        "id": 1,
+        "source_id": 1,
+        "target_id": 2,
+        "note": "Option 1: Cross-Collar Choke"
+        },
+        {
+        "id": 2,
+        "source_id": 1,
+        "target_id": 3,
+        "note": "If opponent defends choke by pushing your arm, transition to armbar"
+        },
+        {
+        "id": 3,
+        "source_id": 1,
+        "target_id": 5,
+        "note": "If opponent turns away from armbar, take their back"
+        },
+        {
+        "id": 4,
+        "source_id": 5,
+        "target_id": 6,
+        "note": "From back control, secure collar control, tilt head, lengthen arm for choke."
+        }
+    ]
 }
 ```
-Note: Send a GET request to jitsujournal.com/sample for quickly getting sample data when building UI and other downstream applications.
+Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ## LLM Service
 ### Input
