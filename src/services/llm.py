@@ -147,6 +147,13 @@ def rename_add_notes(client: genai.Client, problem: str, flowchart: str,
     renamed = client.models.generate_content(
         model="gemini-2.0-flash",
         config=types.GenerateContentConfig(
+            system_instruction="""
+            You're a black belt jiu-jitsu coach capable of
+            analyzing a sequence and giving practitioners (users)
+            advice/details on how to execute and transition between techniques,
+            or any other supplementary information that may be valuable for increasing
+            the success of the sequence they're trying to implement/execute. 
+            """,
             response_mime_type="application/json",
             response_schema=Graph,
             temperature=0.75
