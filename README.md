@@ -24,10 +24,9 @@ LLM RAG based API for generating jiu-jitsu sequences given a user's problem. Bui
 
 Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being used throughout the LLM service functions for their low-to-free costs and large input/output token limits. Additionally, their [Gen AI library](https://github.com/googleapis/python-genai) for developers has an interface that makes it really easy to generate structured outputs with the help of [PyDantic models](https://docs.pydantic.dev/latest/).
 
-As shown in the diagram above, we use the following models:
-
+We use the following models:
 - [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for its fast response and high input token limit.
-- [gemini-2.5-flash-lite-preview-06-17](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (as of Jul 2, 2025). Currently being used only for generating a hypothetical answer to the users jiu-jitsu problem.
+- [gemini-2.5-flash-lite-preview-06-17](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (as of Jul 2, 2025). Currently being used only for generating a hypothetical answer to the user's jiu-jitsu problem.
 - [text-embedding-004](https://ai.google.dev/gemini-api/docs/models#text-embedding): Used for creating embeddings of tutorials and generated solutions to facilitate RAG.
 
 ## API
@@ -40,7 +39,7 @@ Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). 
 
 To facilitate usage thresholds, we create a new record in the database with UUIDs from JitsuJournal whenever a user tries to call a specific API endpoint. When a new request is received, we check if the sum of a user's usage records is within their assigned limit for a set period (e.g. 50 per month).
 
-Note: UUIDs are not required for contributing to the LLM pipeline. Read contribution guide for more info.
+Note: UUID's are not required for contributing to the LLM pipeline. Read contribution guide for more info.
 
 # Sample
 
@@ -161,9 +160,13 @@ Follow the instructions below to setup your development environment:
   ```
   git clone https://github.com/JitsuJournal/API.git
   ```
-- Step 2: Activate a virtual environment
+- Step 2: Create and activate a virtual environment
   ```
-  # Mac unix/linux
+  # Create virtual environment
+  python -m venv venv
+  
+  # Activate virtual environment
+  # Mac/Linux/Unix
   source ./venv/bin/activate
 
   # Windows
@@ -171,14 +174,14 @@ Follow the instructions below to setup your development environment:
   ```
 - Step 3: Install dependencies from PyPi
   ```
-  pip install requirements.txt
+  pip install -r requirements.txt
   ```
 - Step 4: Setup environment variables
   ```
   GEMINI='YOUR_GEMINI_KEY'
   # Supabase keys (optional)
   SUPABASE_URL='YOUR_SUPABASE_URL'
-  SUPABASE_KEY='YOUR_SUPABASE_URL'
+  SUPABASE_KEY='YOUR_SUPABASE_KEY'
   ```
 Congratulations! You're now ready to start contributing to JitsuJournal's API!
 
