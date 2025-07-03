@@ -134,7 +134,7 @@ from src.services.llm import conn_gemini, create_paragraph
 # After setting gemini key in .env
 gemini = conn_gemini()
 
-problem: str = "Some jiu jitsu problem"
+problem: str = "Show me different ways to break an opponents closed guard when i'm on top and pass it to end up in side control or mount."
 response: str = create_paragraph(gemini, problem).text
 
 print(response)
@@ -143,8 +143,7 @@ print(response)
 ### Output
 
 ```
-# Pull from the logged responses
-# Don't even need to regenerate
+Alright, let's break down the closed guard and get you into dominant positions. This is a fundamental skill in Jiu-Jitsu, and we'll cover both gi and no-gi approaches. Remember, the key is to be patient, persistent, and understand the principles of leverage and control.\n\n**The Problem:** You're on top, your opponent has a tight closed guard. You want to pass and establish side control or mount.\n\n**The Goal:** Break the guard, pass, and secure a dominant position (side control or mount).\n\n**The Principles:**\n\n*   **Posture:** Maintain good posture to prevent submissions and create space.\n*   **Base:** Keep your weight distributed and your base wide to avoid being swept.\n*   **Patience:** Don't rush. Break the guard systematically.\n*   **Control:** Control your opponent's limbs to limit their options.\n*   **Pressure:** Apply consistent pressure to break the guard and wear your opponent down.\n*   **Angles:** Use angles to create openings and avoid being caught in submissions.\n\n**The Sequence....
 ```
 
 # Contribution Guide
