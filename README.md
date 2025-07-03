@@ -1,10 +1,10 @@
 # JitsuJournal API
 
-LLM RAG based API for generating jiu-jitsu sequences given a users problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
+LLM RAG based API for generating jiu-jitsu sequences given a user's problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
 
 ## AI/LLM Pipeline
 
-- Step 1: Generate a jiu-jitsu sequence in text as the solution to a users problem/prompt [\[1\]](https://arxiv.org/abs/2212.10496).
+- Step 1: Generate a jiu-jitsu sequence in text as the solution to a user's problem/prompt [\[1\]](https://arxiv.org/abs/2212.10496).
 - Step 2: Use the generated sequence to perform a similarity search and retrieve sequences extracted from real youtube tutorials [\[2\]](https://arxiv.org/abs/2005.11401).
 - Step 3: Use the retrieved sequences to ground the generated solution, increasing overall correctness.
 - Step 4: Breakdown grounded sequence into steps and convert them into a react-flow like light-weight directed-graph data-structure.
@@ -18,29 +18,29 @@ LLM RAG based API for generating jiu-jitsu sequences given a users problem. Buil
 
 ## Database
 
-[Supabase](https://supabase.com/database) and [PostgreSQL](https://www.postgresql.org/) are being used as the primary persistent data store. In addition to maintaing a table with 100+ techniques, PostgreSQL's [pgector](https://github.com/pgvector/pgvector/) implementation is being used for storing the embededed youtube tutorials sequences and facilitating similarity searches.
+[Supabase](https://supabase.com/database) and [PostgreSQL](https://www.postgresql.org/) are being used as the primary persistent data store. In addition to maintaining a table with 100+ techniques, PostgreSQL's [pgvector](https://github.com/pgvector/pgvector/) implementation is being used for storing the embedded YouTube tutorial sequences and facilitating similarity searches.
 
 ## AI
 
-Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being used throughout the LLM service functions for their low-to-free costs and large input/output token limits. Additionally, their [Gen AI library](https://github.com/googleapis/python-genai) for developers has a interface that makes it really easy to generate structured outputs with the help of [PyDantic models](https://docs.pydantic.dev/latest/).
+Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being used throughout the LLM service functions for their low-to-free costs and large input/output token limits. Additionally, their [Gen AI library](https://github.com/googleapis/python-genai) for developers has an interface that makes it really easy to generate structured outputs with the help of [PyDantic models](https://docs.pydantic.dev/latest/).
 
 As shown in the diagram above, we use the following models:
 
-- [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for it's fast response and high input token limit.
+- [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for its fast response and high input token limit.
 - [Gemini-2.5-flash-preview-05-20](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (outdated). Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower free rate limits.
 - [text-embedding-004](https://ai.google.dev/gemini-api/docs/models#text-embedding): Used for creating embeddings of tutorials and generated solutions to facilitate RAG.
 
 ## API
 
-Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). It's simple interface makes it the best option for minimizing boiler plate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem by calling LLM service functions. Response models and request body parameters are type safed using PyDantic models.
+Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). Its simple interface makes it the best option for minimizing boilerplate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible for solving users' jiu-jitsu problems by calling LLM service functions. Response models and request body parameters are type-safe using PyDantic models.
 
 [Render&#39;s platform](https://render.com/) and tooling for web services are currently being used for hosting this repo with auto-deployments configured for the main branch.
 
 ## Auth
 
-To facilitate usage thresholds, we create a new record in the database with UUID's from JitsuJournal whenever a user tries to call a specific API endpoint. When a new request is received, we check if the sum of a users usage records is within their assigned limit for a set period (e.x. 50 per month).
+To facilitate usage thresholds, we create a new record in the database with UUIDs from JitsuJournal whenever a user tries to call a specific API endpoint. When a new request is received, we check if the sum of a user's usage records is within their assigned limit for a set period (e.g. 50 per month).
 
-Note: UUID's are not required for contributing to the LLM pipeline. Read contribution guide for more info.
+Note: UUIDs are not required for contributing to the LLM pipeline. Read contribution guide for more info.
 
 # Sample
 
@@ -65,7 +65,7 @@ Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly get
 ### Output
 
 ```
-// Recommened: Implement your own error handling logic
+// Recommended: Implement your own error handling logic
 // If no errors, print results
 console.log(response.data);
 ```
@@ -155,13 +155,13 @@ Alright, let's break down the closed guard and get you into dominant positions. 
 
 ## Setup
 
-Follow the instructions below to setup your development envoirnment:
+Follow the instructions below to setup your development environment:
 
 - Step 1: Download or clone the repository
   ```
   git clone https://github.com/JitsuJournal/API.git
   ```
-- Step 2: Activate a virtual envoirnment
+- Step 2: Activate a virtual environment
   ```
   # Mac unix/linux
   source ./venv/bin/activate
@@ -173,7 +173,7 @@ Follow the instructions below to setup your development envoirnment:
   ```
   pip install requirements.txt
   ```
-- Step 4: Setup envoirnment variables
+- Step 4: Setup environment variables
   ```
   GEMINI='YOUR_GEMINI_KEY'
   # Supabase keys (optional)
@@ -183,10 +183,10 @@ Follow the instructions below to setup your development envoirnment:
 Congratulations! You're now ready to start contributing to JitsuJournal's API!
 
 ## Pull Requests
-When you are done making changes on your fork (or branch), you an open a pull request to merge changes with the main branch.
+When you are done making changes on your fork (or branch), you can open a pull request to merge changes with the main branch.
 
 Follow [PEP 8](https://peps.python.org/pep-0008/) for making your code easy to review and merge:
-- Cammel case for variables
+- Camel case for variables
 - Underscore notation for functions and classes
 - Uppercase names for constants
 - Pop off with comments!
