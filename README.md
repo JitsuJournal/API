@@ -31,13 +31,12 @@ As shown in the diagram above, we use the following models:
 
 Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). It's simple interface makes it the best option for minimizing boiler plate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem by calling LLM service functions. Response models and request body parameters are type safed using PyDantic models.
 
-[Render&#39;s platform](https://render.com/) and tooling for web services is currently being used for hosting with auto-deployments.
+[Render's platform](https://render.com/) and tooling for web services are currently being used for hosting this repo with auto-deployments configured for the main branch.
 
 ## Auth
+To facilitate usage thresholds, we create a new record in the database with UUID's from JitsuJournal whenever a user tries to call a specific API endpoint. When a new request is received, we check if the sum of a users usage records is within their assigned limit for a set period (e.x. 50 per month).
 
-To facilitate rate limiting for API endpoints, we use UUID's generated when users sign up on JitsuJournal and keep track of their usage. When a new request is received, we check if the sum of their usage is within their assigned limit for a period (e.x. 50 per month).
-
-UUID's are not required for contributing to the LLM pipeline, read setup instruction below.
+Note: UUID's are not required for contributing to the LLM pipeline. Read contribution guide for more info.
 
 # Sample
 
@@ -151,11 +150,13 @@ print(response)
 
 # Contribution Guide
 
-## Setup Dev. Env.
+## Setup
 
-## Open Pull Request
 
+## Open PR
 When you are done with your fork or branch and pushed any commits and changes, you an open a pull request to fork
+
+Follow the PR template for making your code easier to review :)
 
 ## Contact
 
