@@ -23,18 +23,15 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 # Architecture
 
 ## Database
-
 [Supabase](https://supabase.com/database) and [PostgreSQL](https://www.postgresql.org/) are being used as the primary persistent data store. In addition to maintaing a table with 100+ techniques, PostgreSQL's [pgector](https://github.com/pgvector/pgvector/) implementation is being used for storing the embededed youtube tutorials sequences and facilitating similarity searches.
 
 ## AI
+Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being used throughout the LLM service functions for their low-to-free costs and large input/output token limits. Additionally, their [Gen AI library](https://github.com/googleapis/python-genai) for developers has a interface that makes it really easy to generate structured outputs with the help of [PyDantic models](https://docs.pydantic.dev/latest/).
 
-Google's Gemini models are being used throughout the LLM service functions for their low to free costs, large input and output token limits, and generous rate limits. The Gen AI library provided by Google for developers has a really beautiful interface, making it really easy to generate structured output with the help of PyDantic models.
-
-As shown in the diagram above, we use different Gemini models:
-
-- Gemini-2.0-flash-lite: Used in steps 1, 3, 4, and 5. This model was chosen for it's fast response and high input token limit.
-- Gemini-2.5-flash-preview-05-20: Was the smartest model that was free. Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower rate limits.
-- text-embedding-004: Used for creating embeddings of tutorials and hyde doc for RAG.
+As shown in the diagram above, we use the following models:
+- [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for it's fast response and high input token limit.
+- [Gemini-2.5-flash-preview-05-20](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (outdated). Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower free rate limits.
+- [text-embedding-004](https://ai.google.dev/gemini-api/docs/models#text-embedding): Used for creating embeddings of tutorials and generated solutions to facilitate RAG.
 
 ## API
 
