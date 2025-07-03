@@ -27,7 +27,7 @@ Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being
 As shown in the diagram above, we use the following models:
 
 - [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for its fast response and high input token limit.
-- [Gemini-2.5-flash-preview-05-20](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (outdated). Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower free rate limits.
+- [gemini-2.5-flash-lite-preview-06-17](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (as of Jul 2, 2025). Currently being used only for generating a hypothetical answer to the users jiu-jitsu problem.
 - [text-embedding-004](https://ai.google.dev/gemini-api/docs/models#text-embedding): Used for creating embeddings of tutorials and generated solutions to facilitate RAG.
 
 ## API

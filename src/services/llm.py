@@ -21,7 +21,7 @@ def create_paragraph(client: genai.Client, problem: str):
     and generates a hypothetical answer in a paragraph as solution.
     """
     solution = client.models.generate_content(
-        model="gemini-2.0-flash-lite",#"gemini-2.5-flash-preview-05-20",
+        model= "gemini-2.5-flash-lite-preview-06-17", #"gemini-2.0-flash-lite",
         config=types.GenerateContentConfig(
             temperature=0.25
         ),
