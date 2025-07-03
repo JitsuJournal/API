@@ -17,12 +17,15 @@ LLM RAG based API for generating jiu-jitsu sequences given a users problem. Buil
 # Architecture
 
 ## Database
+
 [Supabase](https://supabase.com/database) and [PostgreSQL](https://www.postgresql.org/) are being used as the primary persistent data store. In addition to maintaing a table with 100+ techniques, PostgreSQL's [pgector](https://github.com/pgvector/pgvector/) implementation is being used for storing the embededed youtube tutorials sequences and facilitating similarity searches.
 
 ## AI
+
 Google's [Gemini models](https://ai.google.dev/gemini-api/docs/models) are being used throughout the LLM service functions for their low-to-free costs and large input/output token limits. Additionally, their [Gen AI library](https://github.com/googleapis/python-genai) for developers has a interface that makes it really easy to generate structured outputs with the help of [PyDantic models](https://docs.pydantic.dev/latest/).
 
 As shown in the diagram above, we use the following models:
+
 - [Gemini-2.0-flash-lite](https://ai.google.dev/gemini-api/docs/models#gemini-2.0-flash-lite): Used in step 1 to 5 (except 2). This model was chosen for it's fast response and high input token limit.
 - [Gemini-2.5-flash-preview-05-20](https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash): Smartest free model (outdated). Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower free rate limits.
 - [text-embedding-004](https://ai.google.dev/gemini-api/docs/models#text-embedding): Used for creating embeddings of tutorials and generated solutions to facilitate RAG.
@@ -31,9 +34,10 @@ As shown in the diagram above, we use the following models:
 
 Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). It's simple interface makes it the best option for minimizing boiler plate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem by calling LLM service functions. Response models and request body parameters are type safed using PyDantic models.
 
-[Render's platform](https://render.com/) and tooling for web services are currently being used for hosting this repo with auto-deployments configured for the main branch.
+[Render&#39;s platform](https://render.com/) and tooling for web services are currently being used for hosting this repo with auto-deployments configured for the main branch.
 
 ## Auth
+
 To facilitate usage thresholds, we create a new record in the database with UUID's from JitsuJournal whenever a user tries to call a specific API endpoint. When a new request is received, we check if the sum of a users usage records is within their assigned limit for a set period (e.x. 50 per month).
 
 Note: UUID's are not required for contributing to the LLM pipeline. Read contribution guide for more info.
@@ -55,6 +59,7 @@ const response = await axios.post(
     {user_id, problem}
 );
 ```
+
 Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ### Output
@@ -150,9 +155,43 @@ Alright, let's break down the closed guard and get you into dominant positions. 
 
 ## Setup
 
+Follow the instructions below to setup your development envoirnment:
 
-## Open PR
+- Step 1: Download or clone the repository
+  ```
+  git clone https://github.com/JitsuJournal/API.git
+  ```
+- Step 2: Activate a virtual envoirnment
+  ```
+  # Mac unix/linux
+  source ./venv/bin/activate
+
+  # Windows
+  .\venv\Scripts\activate
+  ```
+- Step 3: Install dependencies from PyPi
+  ```
+  pip install requirements.txt
+  ```
+- Step 4: Setup envoirnment variables
+  ```
+  GEMINI='YOUR_GEMINI_KEY'
+  # Supabase keys (optional)
+  SUPABASE_URL='YOUR_SUPABASE_URL'
+  SUPABASE_KEY='YOUR_SUPABASE_URL'
+  ```
+
+Congratulations! You're now ready to start contributing to JitsuJournal's AI API! There are two main areas for contribution; The __API layer__ and the __LLM service__.
+
+### API Contribution
+
+### LLM Service Contribution
+
+## Pull Requests
+
 When you are done with your fork or branch and pushed any commits and changes, you an open a pull request to fork
+
+Follow PEP naming conventions. CamelCase for variables and under scores for function/class names.
 
 Follow the PR template for making your code easier to review :)
 
