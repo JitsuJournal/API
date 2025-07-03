@@ -2,13 +2,7 @@
 
 LLM RAG based API for generating jiu-jitsu sequences given a users problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
 
-# AI/LLM Pipeline
-
-## Diagram
-
-Sample image showing an illustration of the models, db store, log flow, and other info.
-
-## Summary
+## AI/LLM Pipeline
 
 - Step 1: Generate a jiu-jitsu sequence in text as the solution to a users problem/prompt [\[1\]](https://arxiv.org/abs/2212.10496).
 - Step 2: Use the generated sequence to perform a similarity search and retrieve sequences extracted from real youtube tutorials [\[2\]](https://arxiv.org/abs/2005.11401).
@@ -37,7 +31,7 @@ As shown in the diagram above, we use the following models:
 
 Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). It's simple interface makes it the best option for minimizing boiler plate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem by calling LLM service functions. Response models and request body parameters are type safed using PyDantic models.
 
-[Render's platform](https://render.com/) and tooling for web services is currently being used for hosting with auto-deployments.
+[Render&#39;s platform](https://render.com/) and tooling for web services is currently being used for hosting with auto-deployments.
 
 ## Auth
 
