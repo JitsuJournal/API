@@ -1,6 +1,6 @@
 # JitsuJournal API
 
-LLM based API for generating jiu-jitsu sequences given a users problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
+LLM RAG based API for generating jiu-jitsu sequences given a users problem. Built with FastAPI and Gemini, this repository powers JitsuJournal's "Ask AI" feature.
 
 # AI/LLM Pipeline
 
@@ -10,26 +10,28 @@ Sample image showing an illustration of the models, db store, log flow, and othe
 
 ## Summary
 
-- Step 1: Generate a jiu-jitsu sequence as the solution to a users problem/prompt [1]
-- Step 2: Use the generated sequence to perform a similarity search and retrieve sequences from real youtube tutorials [2]
-- Step 3: Use the retrieved sequences to ground the generated solution, increasing correctness
-- Step 4: Breakdown grounded sequence into steps and convert into a react-flow like direct-graph data-structure
-- Step 5: Rename sequence and recreate notes using the directed-graph and retrieved/generated sequences.
+- Step 1: Generate a jiu-jitsu sequence in text as the solution to a users problem/prompt [\[1\]](https://arxiv.org/abs/2212.10496).
+- Step 2: Use the generated sequence to perform a similarity search and retrieve sequences extracted from real youtube tutorials [\[2\]](https://arxiv.org/abs/2005.11401).
+- Step 3: Use the retrieved sequences to ground the generated solution, increasing overall correctness.
+- Step 4: Breakdown grounded sequence into steps and convert them into a react-flow like light-weight directed-graph data-structure.
+- Step 5: Rename sequence and recreate notes using the directed-graph and retrieved/generated sequences as inputs.
 
-[1] [Gao, Luyu, et al. "Precise zero-shot dense retrieval without relevance labels." Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). 2023.](https://arxiv.org/abs/2212.10496)
+[1] [Gao, Luyu, et al. &#34;Precise zero-shot dense retrieval without relevance labels.&#34; Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). 2023.](https://arxiv.org/abs/2212.10496)
 
-[2] [Lewis, Patrick, et al. "Retrieval-augmented generation for knowledge-intensive nlp tasks." Advances in neural information processing systems 33 (2020): 9459-9474.](https://arxiv.org/abs/2005.11401)
+[2] [Lewis, Patrick, et al. &#34;Retrieval-augmented generation for knowledge-intensive nlp tasks.&#34; Advances in neural information processing systems 33 (2020): 9459-9474.](https://arxiv.org/abs/2005.11401)
 
 # Architecture
 
 ## Database
 
-Supabase[link] and PostgreSQL[link] are being used as the primary persistent data store. In addition to maintaing a table with the techniques, PostgreSQL's vector store mode is also used for storing the embededed youtube tutorials sequences and perform similarity search.
+[Supabase](https://supabase.com/database) and [PostgreSQL](https://www.postgresql.org/) are being used as the primary persistent data store. In addition to maintaing a table with 100+ techniques, PostgreSQL's [pgector](https://github.com/pgvector/pgvector/) implementation is being used for storing the embededed youtube tutorials sequences and facilitating similarity searches.
 
 ## AI
+
 Google's Gemini models are being used throughout the LLM service functions for their low to free costs, large input and output token limits, and generous rate limits. The Gen AI library provided by Google for developers has a really beautiful interface, making it really easy to generate structured output with the help of PyDantic models.
 
 As shown in the diagram above, we use different Gemini models:
+
 - Gemini-2.0-flash-lite: Used in steps 1, 3, 4, and 5. This model was chosen for it's fast response and high input token limit.
 - Gemini-2.5-flash-preview-05-20: Was the smartest model that was free. Although it can be used in replacement of Gemini-2.0-flash-lite, we've currently commented it out since it has lower rate limits.
 - text-embedding-004: Used for creating embeddings of tutorials and hyde doc for RAG.
@@ -51,6 +53,7 @@ UUID's are not required for contributing to the LLM pipeline, read setup instruc
 ## API Request
 
 ### Input
+
 ```
 // API request from client-side/front-end 
 // you can also use tools like postman for sending a request
@@ -64,11 +67,13 @@ const response = await axios.post(
 ```
 
 ### Output
+
 ```
 // Recommened: Implement your own error handling logic
 // If no errors, print results
 console.log(response.data);
 ```
+
 ```
 {
     "name": "Mount Attack Sequence",
@@ -122,14 +127,18 @@ console.log(response.data);
     ]
 }
 ```
+
 Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ## LLM Service
+
 ### Input
+
 ```
 # .env file
 GEMINI = 'YOUR_GEMINI_KEY'
 ```
+
 ```
 from src.services.llm import conn_gemini, create_paragraph
 
@@ -141,7 +150,9 @@ response: str = create_paragraph(gemini, problem).text
 
 print(response)
 ```
+
 ### Output
+
 ```
 # Pull from the logged responses
 # Don't even need to regenerate
