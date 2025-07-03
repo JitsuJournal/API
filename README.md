@@ -55,6 +55,7 @@ const response = await axios.post(
     {user_id, problem}
 );
 ```
+Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ### Output
 
@@ -117,8 +118,6 @@ console.log(response.data);
     ]
 }
 ```
-
-Note: Send a GET request to https://api-g5to.onrender.com/sample for quickly getting sample data when building UI and other downstream applications.
 
 ## LLM Service
 
