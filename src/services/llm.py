@@ -122,7 +122,8 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
             and merge them into a single, compact, directed graph.
             Prioritize the techniques and pathways relevant to the given user problem.
             The final graph must not exceed 10 nodes and should only contain 1 root node.
-
+            Create branches where the paths diverge to include multiple options.
+            
             Requirements:
             - Use only the techniques from the given list, if not possible, give error
             - 'Top' and 'bottom' denote attacker and defender roles respectively within each position.
@@ -131,7 +132,6 @@ def create_flowchart(client: genai.Client, problem: str, sequences: str, techniq
                 - `id`: the node ID
                 - `techinque_id`: ID from the provided technique list   
             - Each edge should connect `source` to `target` using node IDs
-            - Create branches where the paths diverge.
             - Eliminate duplicate steps and pathways.
             """]
     )
