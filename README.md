@@ -180,22 +180,18 @@ Follow the instructions below to setup your development envoirnment:
   SUPABASE_URL='YOUR_SUPABASE_URL'
   SUPABASE_KEY='YOUR_SUPABASE_URL'
   ```
-
-Congratulations! You're now ready to start contributing to JitsuJournal's AI API! There are two main areas for contribution; The __API layer__ and the __LLM service__.
-
-### API Contribution
-
-### LLM Service Contribution
+Congratulations! You're now ready to start contributing to JitsuJournal's API!
 
 ## Pull Requests
+When you are done making changes on your fork (or branch), you an open a pull request to merge changes with the main branch.
 
-When you are done with your fork or branch and pushed any commits and changes, you an open a pull request to fork
+Follow [PEP 8](https://peps.python.org/pep-0008/) for making your code easy to review and merge:
+- Cammel case for variables
+- Underscore notation for functions and classes
+- Uppercase names for constants
+- Pop off with comments!
 
-Follow PEP naming conventions. CamelCase for variables and under scores for function/class names.
-
-Follow the PR template for making your code easier to review :)
+Note: No PR template at the moment!
 
 ## Contact
-
-- Discord
-- Email
+- Email: harrisiva6@gmail.com (or team@jitsujournal.com)
