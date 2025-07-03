@@ -35,9 +35,9 @@ As shown in the diagram above, we use the following models:
 
 ## API
 
-Implemented the API/HTTP layer using Fast API. It's simple interface makes it the best option for minimizing boiler plate code. The Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem. Response models and request body parameters are type safed using PyDantic models.
+Implemented the API/HTTP layer using [Fast API](https://fastapi.tiangolo.com/). It's simple interface makes it the best option for minimizing boiler plate code. Supabase and Gemini clients are injected as dependencies to the endpoint responsible of solving users jiu-jitsu problem by calling LLM service functions. Response models and request body parameters are type safed using PyDantic models.
 
-Render's platform and tooling for web services is being used for hosting.
+[Render's platform](https://render.com/) and tooling for web services is currently being used for hosting with auto-deployments.
 
 ## Auth
 
