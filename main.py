@@ -283,12 +283,39 @@ def solve(
 
 
 @app.post('/tutorials/') # response_model=list[str])
-def tutorials(nodes, edges):
+def tutorials(nodes: list[dict], edges: list[dict]):
     print('Nodes:')
     print(nodes)
     print('Edges:')
     print(edges)
-    return
+
+
+
+    # Define sample data that we can return for now
+    # and use as reference for building the response model
+    sample_output = [
+        {
+            'id':0, 'title': 'Untitled Video 1', 'description':'Something about the video that is pulled from the video directly.',
+            'date': '2023, October 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+        },
+        {
+            'id':1, 'title': 'Untitled Video 2', 'description':'Something about the video that is pulled from the video directly.',
+            'date': '2023, January 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+        },
+        {
+            'id':2, 'title': 'Untitled Video 3', 'description':'Something about the video that is pulled from the video directly.',
+            'date': '2023, November 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+        },
+        {
+            'id':3, 'title': 'Untitled Video 4', 'description':'Something about the video that is pulled from the video directly.',
+            'date': '2023, December 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+        },
+        {
+            'id':4, 'title': 'Untitled Video 5', 'description':'Something about the video that is pulled from the video directly.',
+            'date': '2024, October 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+        },
+    ]
+    return sample_output
 
 
 # NOTE: Commented out driver code to avoid collisions 
