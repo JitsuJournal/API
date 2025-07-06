@@ -3,6 +3,7 @@ import json
 from typing import Annotated
 # Local
 from src.models.general import UserQuery, Sequence, Graph
+from src.models.reactflow import Node, Edge
 from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart, rename_add_notes
 from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
 # Third party
@@ -283,13 +284,11 @@ def solve(
 
 
 @app.post('/tutorials/') # response_model=list[str])
-def tutorials(nodes: list[dict], edges: list[dict]):
+def tutorials(nodes: list[Node], edges: list[Edge]):
     print('Nodes:')
     print(nodes)
     print('Edges:')
     print(edges)
-
-
 
     # Define sample data that we can return for now
     # and use as reference for building the response model
