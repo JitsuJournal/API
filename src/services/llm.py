@@ -175,13 +175,16 @@ def rename_add_notes(client: genai.Client, problem: str, flowchart: str,
     return renamed
 
 
-if __name__=="__main__":
+
+def _main():
     import json
     from .db import conn_supabase, similarity_search, get_techniques
+    # LLM functions are simply directly referenced from the above code
 
     client = conn_gemini()
+
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
-    solution = create_paragraph(client, problem) # NOTE: Need to switch to stronger model
+    solution = create_paragraph(client, problem)
 
     # Initialize supabase client
     supabase = conn_supabase()
@@ -231,7 +234,14 @@ if __name__=="__main__":
         sequences=sequences, similar=similar,
         techniques=techniques,
     ).parsed
-
     
+
     print('-'*15)
     print(renamed.model_dump_json(indent=2))
+    return
+
+
+if __name__=="__main__":
+    # Driver code for running the sequence building
+    # from user jiu-jitsu problem pipeline
+    _main()
