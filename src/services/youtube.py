@@ -8,32 +8,22 @@ from googleapiclient.discovery import Resource, build # client for using all you
 
 load_dotenv()
 
-
-# function for getting snippet and other basic information
-# given video id and v3 build/client
-# NOTE: Should also be able to handle a list if it's not too weird
-# When using, have a batch limit on the video id's 
-# to avoid passing the GET request url character limit
-def get_basic_info(client: Resource, videoId: list[str] | str) -> list[Video] | Video:
-    # NOTE: Cases/conditions
-    # - handle list of strings
-    # - handle single string
-
+def get_basic_info(client: Resource, videoId:str) -> Video:
+    """
+    function for getting basic youtube information snippet.
+    given a. video id and v3 build/client
+    """
     # Use the client to fetch video informaiton for one video Id
     response = client.videos().list(
         part='snippet',
         id=videoId
     ).execute()
-
-    meta = Video(
+    reshaped = Video(
         id=videoId, title=response['items'][0]['snippet']['title'],
         description=response['items'][0]['snippet']['description'],
         uploaded_at=response['items'][0]['snippet']['publishedAt'],
     )
-
-    # NOTE: review and update the above function to handle multiple videos
-    # when given a list of video id's instead of a single video 
-    return meta
+    return reshaped
 
 
 
