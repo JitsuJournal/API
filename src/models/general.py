@@ -24,3 +24,11 @@ class Graph(BaseModel):
     # Directed graph representation
     nodes: list[Node]
     edges: list[Edge]
+
+
+class Video(BaseModel):
+    id: str # TODO: Add data validation by enforcing the length of the id
+    title: str
+    description: str | None
+    uploaded_at: str # TODO: Switch to a datetime value, match sample_output and frontend ingestion to consider field name change
+    url: str
