@@ -2,6 +2,7 @@
 import os
 from dotenv import load_dotenv
 # local
+from ..models.general import Video
 # third-party
 from googleapiclient.discovery import Resource, build # client for using all youtube search services
 
@@ -13,7 +14,7 @@ load_dotenv()
 # NOTE: Should also be able to handle a list if it's not too weird
 # When using, have a batch limit on the video id's 
 # to avoid passing the GET request url character limit
-def get_basic_info(client: Resource, videoId: list[str] | str):
+def get_basic_info(client: Resource, videoId: list[str] | str) -> list[Video] | Video:
     # NOTE: Cases/conditions
     # - handle list of strings
     # - handle single string
