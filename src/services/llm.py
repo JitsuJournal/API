@@ -175,7 +175,7 @@ def rename_add_notes(client: genai.Client, problem: str, flowchart: str,
     return renamed
 
 
-def extract_paragraph(client: genai.Client, nodes, edges):
+def extract_paragraph(client: genai.Client, nodes: str, edges: str):
     """
     Given a sequence represented by nodes and edges, forming a
     directed graph, this function is responsible for creating
@@ -186,10 +186,23 @@ def extract_paragraph(client: genai.Client, nodes, edges):
     Response is generally used for performing similarity searches
     and identifying tutorials teaching how to execute the sequence.
     """
-
-
-
-    return
+    extracted = client.models.generate_content(
+        model='gemini-2.0-flash',
+        config=types.GenerateContentConfig(
+            system_instruction="You're a black belt/expert coach in brazilian jiu-jitsu, gi and no-gi.",
+            response_mime_type="application/json",
+            response_schema=list[str],
+            temperature=0.25,
+        ),
+        contents=[
+            nodes, edges, """
+            Convert the given nodes and edges that represent a jiu-jitsu sequence
+            from a direct graph to a paragraph for each branch, going from the root nodes
+            to the leaf nodes while taking the notes into consideration.
+            """
+        ]
+    )
+    return extracted
 
 
 def _main():
@@ -258,8 +271,131 @@ def _main():
 
 
 if __name__=="__main__":
+    import json
+    from ..models.reactflow import Node, Edge
+
     # Driver code for running the sequence building
     # from user jiu-jitsu problem pipeline
     #_main() # old driver code in func, commented out
+    nodes: Node = [
+        {
+            "id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "name": "Knee Slice",
+            "tags": [
+                "trip",
+                "pass"
+            ]
+        },
+        {
+            "id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "name": "Standard Back Control",
+            "tags": [
+                "top"
+            ]
+        },
+        {
+            "id": "918e7f75-2db2-47eb-bc8c-835936d92f0a",
+            "name": "Triangle",
+            "tags": [
+                "artery"
+            ]
+        },
+        {
+            "id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "name": "Double Under",
+            "tags": [
+                "top",
+                "pass",
+                "standing"
+            ]
+        },
+        {
+            "id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "name": "Standard Side Control",
+            "tags": [
+                "seated",
+                "top"
+            ]
+        },
+        {
+            "id": "63a7913c-f3da-431f-8701-e18984762e59",
+            "name": "Arm Bar",
+            "tags": [
+                "elbow"
+            ]
+        },
+        {
+            "id": "65aa745b-41b5-442c-a99a-b9192f44350e",
+            "name": "Rear Naked Choke",
+            "tags": [
+                "artery"
+            ]
+        },
+        {
+            "id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "name": "Blast Double",
+            "tags": [
+                "wrestling"
+            ]
+        }
+    ]
+    edges: Edge = [
+        {
+            "id": "xy-edge_90e8e114-64ef-47b4-9895-9db8eb14d857-b_0625afa9-4998-43b5-9689-460786cefdff-a",
+            "source_id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "target_id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "note": "From standing, use a blast double to drive forward. Execute a penetration step, driving the opponent's weight over their leg. Transition to a knee slice guard pass by driving your knee across the opponent's thigh, splitting their guard."
+        },
+        {
+            "id": "xy-edge_0625afa9-4998-43b5-9689-460786cefdff-b_5a3d6df5-60c3-40d7-9e78-28a8731958b2-a",
+            "source_id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "target_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "note": "Secure standard side control by pinning the opponent's shoulders and hips, maintaining chest-to-chest contact. Ensure a tight cross-side position by replacing your knee with your hand."
+        },
+        {
+            "id": "xy-edge_5a3d6df5-60c3-40d7-9e78-28a8731958b2-b_63a7913c-f3da-431f-8701-e18984762e59-a",
+            "source_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "target_id": "63a7913c-f3da-431f-8701-e18984762e59",
+            "note": "From side control, control their arm across their body. Apply pressure for a straight arm bar by isolating their arm and controlling their head. Hyperextend the elbow."
+        },
+        {
+            "id": "xy-edge_5a3d6df5-60c3-40d7-9e78-28a8731958b2-b_918e7f75-2db2-47eb-bc8c-835936d92f0a-a",
+            "source_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "target_id": "918e7f75-2db2-47eb-bc8c-835936d92f0a",
+            "note": "Alternatively, from side control, transition to the triangle choke by isolating an arm and controlling their head, using your legs to encircle the opponent's neck and one arm, constricting blood flow."
+        },
+        {
+            "id": "xy-edge_90e8e114-64ef-47b4-9895-9db8eb14d857-b_229f395b-3201-457c-a963-7e9a04dcab64-a",
+            "source_id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "target_id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "note": "From standing, if the knee cut is defended, transition to a double under pass. Side-step and level change, executing a penetration step. Pummel your hands inside while pushing the opponent's legs down."
+        },
+        {
+            "id": "xy-edge_229f395b-3201-457c-a963-7e9a04dcab64-b_10982656-8943-4ab4-bfe5-f7482c1adb55-a",
+            "source_id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "target_id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "note": "After the double under pass, transition to standard back control by securing both hooks and maintaining tight upper body control. Focus on clamping down and retracting the hip to finish."
+        },
+        {
+            "id": "xy-edge_10982656-8943-4ab4-bfe5-f7482c1adb55-b_65aa745b-41b5-442c-a99a-b9192f44350e-a",
+            "source_id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "target_id": "65aa745b-41b5-442c-a99a-b9192f44350e",
+            "note": "From back control, secure a rear naked choke (RNC) by wrapping one arm around their neck and using the other to tighten the grip, cutting off blood flow. Ensure you have a secure RNC grip before applying pressure."
+        }
+    ]
 
-    pass
+    str_nodes: str = json.dumps(nodes)
+    str_edges:str = json.dumps(edges)
+
+    # Pass nodes/edges to extract paragraph 
+    # and retrieve paragraphs representing going from
+    # each root node to the leaf, taking notes into account
+    client: Client = conn_gemini()
+    print('Called Gemini:')
+    extracted = extract_paragraph(client, str_nodes, str_edges)
+    print(extracted.parsed)
+
+    # Perform a similarity search, going over each of branches
+    # and retrieve relevant tutorials used to respond to the user
+    # NOTE: ensure that the response shape matches the frontend/client-side
+    # setup for smooth data ingestion and rendering.
