@@ -14,6 +14,7 @@
 
 if __name__=="__main__":
     from ..services.db import conn_supabase
+    from .. services.youtube import conn_youtube, get_basic_info
 
     # Connect to existing embeddings table
     # fetch all uniuqe video ID's stored
@@ -23,12 +24,24 @@ if __name__=="__main__":
         .select("video_id")
         .execute()
     )
+
     # Length: 181
     uniqueVideoIds = list(dict.fromkeys(d['video_id'] for d in response.data))
-    print(uniqueVideoIds)
+    print("Fetched videoId's to mem:", len(uniqueVideoIds))
 
-    # Grab metadata using youtube data API
+
+    # Initialize client for using the youtube data API
+    client = conn_youtube()
+
+    # Iterate over the video Id's and
+    # grab metadata using youtube data API
+    metadata = get_basic_info(client, uniqueVideoIds[0])
+    print(metadata)
+
+
     # create records in videos table
+    # time.sleep to avoid any rate-limit errors
+
 
 
     # NOTE: Need to match sample data and contain any other metadata/info to Video model

@@ -8,6 +8,9 @@ from googleapiclient.discovery import Resource, build # client for using all you
 
 load_dotenv()
 
+def conn_youtube() -> Resource:
+    return build('youtube', 'v3', developerKey=os.getenv('YOUTUBE'))
+
 def get_basic_info(client: Resource, videoId:str) -> Video:
     """
     function for getting basic youtube information snippet.
@@ -24,7 +27,6 @@ def get_basic_info(client: Resource, videoId:str) -> Video:
         uploaded_at=response['items'][0]['snippet']['publishedAt'],
     )
     return reshaped
-
 
 
 if __name__=="__main__":
@@ -57,13 +59,11 @@ if __name__=="__main__":
                 'bOJ2txGsZxQ', 'Apiijl8_Jm4', 'mlrAfg3aYtA', 'hCxlussP7Bg', 'nYnJ_DKqRac', 'udexDY1WKSc', '6MeiKSZEFT4', 
                 'WVOXKrJlU2U', 'gKhKdswn2pQ', '3pA9wI7TtJ4', 'WqXwqNlPydY', 'Tn12-fMKLhk', 'ZS-23JCbiBs']
 
-
     # Initialize youtube data api client for fetching data
     # build's HTTP layer/closing is taken care by the package
-    client: Resource = build('youtube', 'v3', developerKey=os.getenv('YOUTUBE'))
- 
-    # NOTE: call the get_basic_info function which returns an extracted response
-    # or throws an error since this is a backend type funtion
-    # or we can leave the deconstruction to be done out here
+    client: Resource = conn_youtube()
+
+    # NOTE: call the get_basic_info function which 
+    # returns an extracted response
     response: Video = get_basic_info(client, videoId=videoIds[0])
     print(response)
