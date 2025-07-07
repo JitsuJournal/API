@@ -31,4 +31,3 @@ class Video(BaseModel):
     title: str
     description: str | None
     uploaded_at: str # TODO: Switch to a datetime value, match sample_output and frontend ingestion to consider field name change
-    url: str

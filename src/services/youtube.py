@@ -18,10 +18,22 @@ def get_basic_info(client: Resource, videoId: list[str] | str) -> list[Video] | 
     # NOTE: Cases/conditions
     # - handle list of strings
     # - handle single string
-    print('Inside get_basic_info function')
-    print(client)
-    print(videoId)
-    return
+
+    # Use the client to fetch video informaiton for one video Id
+    response = client.videos().list(
+        part='snippet',
+        id=videoId
+    ).execute()
+
+    meta = Video(
+        id=videoId, title=response['items'][0]['snippet']['title'],
+        description=response['items'][0]['snippet']['description'],
+        uploaded_at=response['items'][0]['snippet']['publishedAt'],
+    )
+
+    # NOTE: review and update the above function to handle multiple videos
+    # when given a list of video id's instead of a single video 
+    return meta
 
 
 
@@ -59,6 +71,9 @@ if __name__=="__main__":
     # Initialize youtube data api client for fetching data
     # build's HTTP layer/closing is taken care by the package
     client: Resource = build('youtube', 'v3', developerKey=os.getenv('YOUTUBE'))
-
-    # call the get_basic_info function
-    response = get_basic_info(client, videoId=videoIds[0])
+ 
+    # NOTE: call the get_basic_info function which returns an extracted response
+    # or throws an error since this is a backend type funtion
+    # or we can leave the deconstruction to be done out here
+    response: Video = get_basic_info(client, videoId=videoIds[0])
+    print(response)

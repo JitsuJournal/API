@@ -290,23 +290,23 @@ def tutorials(nodes: list[Node], edges: list[Edge]):
     sample_output = [
         {
             'id':'0', 'title': 'Untitled Video 1', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, October 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+            'uploaded_at': '2023, October 23'
         },
         {
             'id':'1', 'title': 'Untitled Video 2', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, January 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+            'uploaded_at': '2023, January 23'
         },
         {
             'id':'2', 'title': 'Untitled Video 3', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, November 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+            'uploaded_at': '2023, November 23'
         },
         {
             'id':'3', 'title': 'Untitled Video 4', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, December 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+            'uploaded_at': '2023, December 23'
         },
         {
             'id':'4', 'title': 'Untitled Video 5', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2024, October 23', 'url':'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley'
+            'uploaded_at': '2024, October 23'
         },
     ]
     return sample_output
