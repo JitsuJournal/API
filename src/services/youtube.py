@@ -4,16 +4,16 @@ from dotenv import load_dotenv
 # local
 from ..models.general import Video
 # third-party
-from googleapiclient.discovery import Resource, build # client for using all youtube search services
+from googleapiclient.discovery import Resource, build # client for using all youtube services
 
 load_dotenv()
 
 def conn_youtube() -> Resource:
     return build('youtube', 'v3', developerKey=os.getenv('YOUTUBE'))
 
-def get_basic_info(client: Resource, videoId:str) -> Video:
+def get_basic_info(client: Resource, videoId:str) -> Video | None:
     """
-    function for getting basic youtube information snippet.
+    Function for getting basic youtube information snippet.
     given a. video id and v3 build/client
     """
     # Use the client to fetch video informaiton for one video Id
@@ -21,11 +21,15 @@ def get_basic_info(client: Resource, videoId:str) -> Video:
         part='snippet',
         id=videoId
     ).execute()
-    reshaped = Video(
-        id=videoId, title=response['items'][0]['snippet']['title'],
-        description=response['items'][0]['snippet']['description'],
-        uploaded_at=response['items'][0]['snippet']['publishedAt'],
-    )
+    # Initialize variable for returning data to user
+    # and create Video object if data is available
+    reshaped=None
+    if len(response['items'])>0:
+        reshaped = Video(
+            id=videoId, title=response['items'][0]['snippet']['title'],
+            description=response['items'][0]['snippet']['description'],
+            uploaded_at=response['items'][0]['snippet']['publishedAt'],
+        )
     return reshaped
 
 

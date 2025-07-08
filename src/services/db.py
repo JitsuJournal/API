@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 # Local
+from ..models.general import Video
 # Third Party
 from supabase import create_client, Client
 
@@ -146,6 +147,41 @@ def log_use(client: Client, userid: str, feature:str='askai', metadata:dict|None
         .execute()
     )
     return
+
+def get_unique_embedded_videoids(client: Client) -> list[str]:
+    """
+    Given youtube data API client/resource, this function
+    returns a list of unique video id's. Used primarily in
+    utils.embed for getting metadata for already embedding videos
+    and storing their information in the videos table.
+    """
+    # Connect to existing embeddings table
+    # fetch all uniuqe video ID's stored
+    response = (
+        client.table("embeddings")
+        .select("video_id")
+        .execute()
+    )
+    uniqueIds: list[str] = list(dict.fromkeys(d['video_id'] for d in response.data))
+    return uniqueIds
+
+def insert_video_record(client: Client, video: Video):
+    """
+    Given a Video object from general models, 
+    this function is responsible for inserting it to the
+    videos table. Mostly used as a inside of admin run scripts.
+    """
+    response = (
+        client.table('videos')
+        .insert({
+            'video_id': video.id,
+            'title': video.title,
+            'description': video.description,
+            'uploaded_at': video.uploaded_at,
+        })
+        .execute()
+    )
+    return response
 
 
 if __name__=="__main__":
