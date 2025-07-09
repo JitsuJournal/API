@@ -38,21 +38,17 @@ def set_embedding_basic_info(start: int, timeout:int=5):
         time.sleep(timeout)
     return
 
-# 2)
+# 2) 
+# Given a jiu jitsu sequence branch represented
+# by a graph, perform a embedded similarity search
+# and return with another video for video info from videos table
+# NOTE: Complete the driver for this in the llm.py file
+
+# 3)
 # Review the usage script, mainly the queries
 # fetch relevant tutorials for the queries using their hyde solutions
 # use the tutorials id (cross check with db to avoid duplicates)
-# and store their embedding with metadata.
-
-
+# and store their embeddings with metadata.
 
 if __name__=="__main__":    
-    # NOTE/TODO: Make sure to set the embeddings videoId
-    # as foreign key, making it easier to reference between
-    # youtube videos and their sequence's embeddings.
-    # Maybe in the future we can expand embeddings with timestamps
-    # and redirect users with timestamped urls.
-    
-    # Call driver function to create records in video table
-    # for the unique video id's in the embedding table
-    set_embedding_basic_info(start=166, timeout=2)
+    pass

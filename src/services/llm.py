@@ -205,6 +205,7 @@ def extract_paragraph(client: genai.Client, nodes: str, edges: str):
     return extracted
 
 
+# Driver functions for testing/developing above
 def _main():
     import json
     from .db import conn_supabase, similarity_search, get_techniques
