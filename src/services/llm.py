@@ -187,7 +187,7 @@ def extract_paragraph(client: genai.Client, nodes: str, edges: str):
     and identifying tutorials teaching how to execute the sequence.
     """
     extracted = client.models.generate_content(
-        model='gemini-2.0-flash',
+        model='gemini-2.5-flash',
         config=types.GenerateContentConfig(
             system_instruction="You're a black belt/expert coach in brazilian jiu-jitsu, gi and no-gi.",
             response_mime_type="application/json",
@@ -197,7 +197,7 @@ def extract_paragraph(client: genai.Client, nodes: str, edges: str):
         contents=[
             nodes, edges, """
             Convert the given nodes and edges that represent a jiu-jitsu sequence
-            from a direct graph to a paragraph for each branch, going from the root nodes
+            from a direct graph into paragraphs for each branch, going from the root nodes
             to the leaf nodes while taking the notes into consideration.
             """
         ]
@@ -273,7 +273,9 @@ def _main():
 
 if __name__=="__main__":
     import json
+    
     from ..models.reactflow import Node, Edge
+    from ..services.db import conn_supabase, similarity_search
 
     # Driver code for running the sequence building
     # from user jiu-jitsu problem pipeline
@@ -391,12 +393,32 @@ if __name__=="__main__":
     # Pass nodes/edges to extract paragraph 
     # and retrieve paragraphs representing going from
     # each root node to the leaf, taking notes into account
-    client: Client = conn_gemini()
+    llm_client = conn_gemini()
+    db_client = conn_supabase()
     print('Called Gemini:')
-    extracted = extract_paragraph(client, str_nodes, str_edges)
-    print(extracted.parsed)
+    extracted: list[str] = extract_paragraph(llm_client, str_nodes, str_edges).parsed
+    print(extracted)
 
-    # Perform a similarity search, going over each of branches
-    # and retrieve relevant tutorials used to respond to the user
-    # NOTE: ensure that the response shape matches the frontend/client-side
+    tutorials: dict = {}
+    for paragraph in extracted:
+        # Create an embedded representation for each branch/paragraph
+        embedding: list[float] = create_embedding(llm_client, paragraph=extracted).embeddings[0].values
+
+        # Perform a similarity search to retrive simlar sequences
+        similar: list[dict] = similarity_search(client=db_client, vector=embedding, 
+                                    match_threshold=0.75, match_count=3).data
+
+        # Iterate over the similar sequences and 
+        # use their tutorial id's to get metadata from video table
+        for sequence in similar:
+            videoId: str = sequence['video_id']
+
+            # If it's data doesn't already exist in the tutorials dict``
+            if videoId not in tutorials.keys():
+                # Use the unique video id to get the video metadata
+                # from the videos table and pack into the video model/object
+                # set video id as key and model as value to add to tutorials dict
+                pass
+
+    # NOTE: Ensure that the response shape matches the frontend/client-side
     # setup for smooth data ingestion and rendering.
