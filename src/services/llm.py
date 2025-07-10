@@ -205,7 +205,8 @@ def extract_paragraph(client: genai.Client, nodes: str, edges: str):
     return extracted
 
 
-# Driver functions for testing/developing above
+# Driver for testing/developing 
+# the solve pipeline using a sample prompt
 def _main():
     import json
     from .db import conn_supabase, similarity_search, get_techniques
@@ -270,8 +271,9 @@ def _main():
     print(renamed.model_dump_json(indent=2))
     return
 
-
-if __name__=="__main__":
+# Driver for testing/developing
+# the tutorials pipeline using sample nodes/edges
+def _main2():
     import json
     from ..models.reactflow import Node, Edge
     from ..models.general import Video
@@ -430,3 +432,7 @@ if __name__=="__main__":
     # to match the response model defined in the tutorials endpoint
     flattened: list[Video] = list(tutorials.values())
     print(f'Retrieved {len(flattened)} videos as recommendations')
+    return
+
+if __name__=="__main__":
+    _main2()
