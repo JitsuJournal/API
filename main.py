@@ -297,52 +297,74 @@ def tutorials(
     The unique list of tutorials with metadata is sent to the user/frontend,
     usually for rendering videoCards showing recommended tutorials.
     """
-    # TODO/NOTE: Add error handling to make sure we're not missing anything
-
     # Convert nodes and edges into strings
     # for passing down to LLM
-    str_nodes: str = json.dumps([n.model_dump() for n in nodes])
-    str_edges: str = json.dumps([e.model_dump() for e in edges])
+    try:
+        str_nodes: str = json.dumps([n.model_dump() for n in nodes])
+        str_edges: str = json.dumps([e.model_dump() for e in edges])
+    except: raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE, detail="Failed to parse inputs for extracting paragraphs")
 
     # Pass nodes/edges to extract paragraph 
     # and retrieve paragraphs representing going from
     # each root node to the leaf, taking notes into account
-    extracted: list[str] = extract_paragraph(
-        client=gemini, nodes=str_nodes, edges=str_edges
-    ).parsed
+    try:
+        extracted: list[str] = extract_paragraph(
+            client=gemini, nodes=str_nodes, edges=str_edges
+        ).parsed
+    except: raise HTTPException(status.HTTP_424_FAILED_DEPENDENCY, detail="Failed to extract paragraphs.")
 
     # Iterate over each paragraph in extracted
     # perform embedding, sim search, and store
     # unique tutorials metadata in dict below
     # NOTE: Will be turned to list[Video] before returning
     tutorials: dict[str, Video] = {}
-    for paragraph in extracted:
+    try:
+        for paragraph in extracted:
+            
+            # Create an embedded representation for each branch/paragraph
+            try:
+                embedding: list[float] = create_embedding(gemini, paragraph).embeddings[0].values
+            except:
+                # Skip the current paragraph if we failed to generate embedding
+                # TODO/NOTE: Handle the case of empty below and throw error or log
+                continue
+            
+            # Perform a similarity search to retrive simlar sequences
+            try:
+                similar: list[dict] = similarity_search(client=supabase, vector=embedding, 
+                                            match_threshold=0.75, match_count=3).data
+            except:
+                # Skip the current paragraph if we failed to perform sim. search
+                # TODO/NOTE: Handle the case of empty below and throw error or log
+                continue
 
-        # Create an embedded representation for each branch/paragraph
-        embedding: list[float] = create_embedding(gemini, paragraph).embeddings[0].values
+            # If similar exists, iterate over the sequences and 
+            # use their tutorial id's to get metadata from video table
+            for sequence in similar:
+                # Isolate the sequences videoId
+                # and use it to retrieve the video metadata
+                try:
+                    videoId: str = sequence['video_id']
+                    # If it's data doesn't already exist in the tutorials dict
+                    if videoId not in tutorials: # checks keys
+                        # Use the unique video id to get the video metadata
+                        # from the videos table and pack into the video model/object
+                        videoInfo: dict = get_video(client=supabase, id=videoId).data[0]
+                        video = Video(
+                            id=videoId, title=videoInfo['title'],
+                            description=videoInfo['description'],
+                            uploaded_at=videoInfo['uploaded_at'],
+                        )
+                        # set video id as key and model as value 
+                        # to add to the tutorials dict
+                        tutorials[videoId] = video
+                except:
+                    # Skip the current similar sequence if we failed to get metadata
+                    # TODO/NOTE: Handle the case of empty below and throw error or log                
+                    continue
 
-        # Perform a similarity search to retrive simlar sequences
-        similar: list[dict] = similarity_search(client=supabase, vector=embedding, 
-                                    match_threshold=0.75, match_count=3).data
-
-        # Iterate over the similar sequences and 
-        # use their tutorial id's to get metadata from video table
-        for sequence in similar:
-            videoId: str = sequence['video_id']
-            # If it's data doesn't already exist in the tutorials dict
-            if videoId not in tutorials: # checks keys
-                # Use the unique video id to get the video metadata
-                # from the videos table and pack into the video model/object
-                videoInfo: dict = get_video(client=supabase, id=videoId).data[0]
-                video = Video(
-                    id=videoId, title=videoInfo['title'],
-                    description=videoInfo['description'],
-                    uploaded_at=videoInfo['uploaded_at'],
-                )
-                # set video id as key and model as value 
-                # to add to the tutorials dict
-                tutorials[videoId] = video
-
+    except: raise HTTPException(status.HTTP_424_FAILED_DEPENDENCY, detail="Unexpected error when retrieving videos")
+    
     # Flatten data into a list of Video objects
     # to match the response model defined in the tutorials endpoint
     output: list[Video] = list(tutorials.values())
