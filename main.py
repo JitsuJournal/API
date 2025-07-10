@@ -292,31 +292,6 @@ def tutorials(
     # TODO/NOTE: Complete function/endpoint doc for fastapi
     # TODO/NOTE: Add error handling to make sure we're not missing anything
 
-    # Define sample data that we can return for now
-    # and use as reference for building the response model
-    sample_output = [
-        {
-            'id':'0', 'title': 'Untitled Video 1', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, October 23'
-        },
-        {
-            'id':'1', 'title': 'Untitled Video 2', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, January 23'
-        },
-        {
-            'id':'2', 'title': 'Untitled Video 3', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, November 23'
-        },
-        {
-            'id':'3', 'title': 'Untitled Video 4', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2023, December 23'
-        },
-        {
-            'id':'4', 'title': 'Untitled Video 5', 'description':'Something about the video that is pulled from the video directly.',
-            'uploaded_at': '2024, October 23'
-        },
-    ]
-
     # Convert nodes and edges into strings
     # for passing down to LLM
     str_nodes: str = json.dumps([n.model_dump() for n in nodes])

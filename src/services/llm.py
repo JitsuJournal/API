@@ -174,7 +174,6 @@ def rename_add_notes(client: genai.Client, problem: str, flowchart: str,
     )
     return renamed
 
-
 def extract_paragraph(client: genai.Client, nodes: str, edges: str):
     """
     Given a sequence represented by nodes and edges, forming a
