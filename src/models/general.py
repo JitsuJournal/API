@@ -31,5 +31,5 @@ class Video(BaseModel):
     title: str
     description: str | None
     uploaded_at: str
-    thumbnail: str # NOTE: Default always exists in youtube
     uploaded_by: str # NOTE: Channel title always exists
+    thumbnail: str # NOTE: Default always exists in youtube
