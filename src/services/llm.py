@@ -273,9 +273,9 @@ def _main():
 
 if __name__=="__main__":
     import json
-    
     from ..models.reactflow import Node, Edge
-    from ..services.db import conn_supabase, similarity_search
+    from ..models.general import Video
+    from ..services.db import conn_supabase, similarity_search, get_video
 
     # Driver code for running the sequence building
     # from user jiu-jitsu problem pipeline
@@ -390,14 +390,14 @@ if __name__=="__main__":
     str_nodes: str = json.dumps(nodes)
     str_edges:str = json.dumps(edges)
 
+    # Initialize supabase and gemini clients
+    llm_client = conn_gemini()
+    db_client = conn_supabase()
+
     # Pass nodes/edges to extract paragraph 
     # and retrieve paragraphs representing going from
     # each root node to the leaf, taking notes into account
-    llm_client = conn_gemini()
-    db_client = conn_supabase()
-    print('Called Gemini:')
     extracted: list[str] = extract_paragraph(llm_client, str_nodes, str_edges).parsed
-    print(extracted)
 
     tutorials: dict = {}
     for paragraph in extracted:
@@ -406,7 +406,7 @@ if __name__=="__main__":
 
         # Perform a similarity search to retrive simlar sequences
         similar: list[dict] = similarity_search(client=db_client, vector=embedding, 
-                                    match_threshold=0.75, match_count=3).data
+                                    match_threshold=0.75, match_count=5).data
 
         # Iterate over the similar sequences and 
         # use their tutorial id's to get metadata from video table
@@ -417,16 +417,19 @@ if __name__=="__main__":
             if videoId not in tutorials.keys():
                 # Use the unique video id to get the video metadata
                 # from the videos table and pack into the video model/object
-                
-                
-                
-                # set video id as key and model as value to add to tutorials dict
-                
-                
-                
-                
-                
-                pass
+                videoInfo: dict = get_video(client=db_client, id=videoId).data[0]
+                video = Video(
+                    id=videoId, title=videoInfo['title'],
+                    description=videoInfo['description'],
+                    uploaded_at=videoInfo['uploaded_at'],
+                )
+                # set video id as key and model as value 
+                # to add to the tutorials dict
+                tutorials[videoId] = video
 
-    # NOTE: Ensure that the response shape matches the frontend/client-side
-    # setup for smooth data ingestion and rendering.
+    # Flatten data into a list of Video objects
+    # to match the response model defined in the tutorials endpoint
+    flattened: list[Video] = list(tutorials.values())
+    print(flattened)
+    print()
+    print(f'Retrieved {len(flattened)} videos as recommendations')
