@@ -289,7 +289,14 @@ def tutorials(
         gemini: Annotated[LlmClient, Depends(conn_gemini)],
         supabase: Annotated[DbClient, Depends(conn_supabase)],
     ):
-    # TODO/NOTE: Complete function/endpoint doc for fastapi
+    """
+    Given lightweight react-flow nodes and edges with the technique names
+    and notes, this endpoint creates paragraphs of each path from the root
+    to the leaf nodes. It then performs a similarity search and uses
+    the response to retrive unique tutorials going over similar sequences.
+    The unique list of tutorials with metadata is sent to the user/frontend,
+    usually for rendering videoCards showing recommended tutorials.
+    """
     # TODO/NOTE: Add error handling to make sure we're not missing anything
 
     # Convert nodes and edges into strings
