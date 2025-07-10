@@ -316,15 +316,18 @@ def tutorials(
             'uploaded_at': '2024, October 23'
         },
     ]
-    
+
+    # Convert nodes and edges into strings
+    # for passing down to LLM
+    str_nodes: str = json.dumps([n.model_dump() for n in nodes])
+    str_edges: str = json.dumps([e.model_dump() for e in edges])
 
     # Pass nodes/edges to extract paragraph 
     # and retrieve paragraphs representing going from
     # each root node to the leaf, taking notes into account
     extracted: list[str] = extract_paragraph(
-        client=gemini,nodes=nodes, edges=edges
+        client=gemini, nodes=str_nodes, edges=str_edges
     ).parsed
-
 
     # Iterate over each paragraph in extracted
     # perform embedding, sim search, and store
