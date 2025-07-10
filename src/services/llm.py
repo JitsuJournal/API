@@ -413,11 +413,19 @@ if __name__=="__main__":
         for sequence in similar:
             videoId: str = sequence['video_id']
 
-            # If it's data doesn't already exist in the tutorials dict``
+            # If it's data doesn't already exist in the tutorials dict
             if videoId not in tutorials.keys():
                 # Use the unique video id to get the video metadata
                 # from the videos table and pack into the video model/object
+                
+                
+                
                 # set video id as key and model as value to add to tutorials dict
+                
+                
+                
+                
+                
                 pass
 
     # NOTE: Ensure that the response shape matches the frontend/client-side

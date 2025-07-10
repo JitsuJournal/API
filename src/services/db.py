@@ -183,26 +183,29 @@ def insert_video_record(client: Client, video: Video):
     )
     return response
 
+def get_video(client: Client, id: str):
+    """
+    This function is used for getting the metadata
+    from the videos table for any given video's unique ID.
+    The response is usually used for recommending tutorials
+    or checking if we already have videos stored in our db.
+    """
+    response = (
+        client.table('videos')
+        .select('*')
+        .eq('video_id', id)
+        .execute()
+    )
+    return response
 
-if __name__=="__main__":
-    TEST_UID:str = os.environ.get('HARRI_UID')
-    TEST2_UID:str = os.environ.get('HARRI2_UID')
-    
+
+if __name__=="__main__":    
+    # Initialize db connection
     client=conn_supabase()
-    #techniques = get_techniques(client)
     
-    #limit: int = get_user_limit(client, TEST_UID)
-    #usage: int = get_usage(client, TEST_UID)
+    # Sample/test ID
+    videoId = '0iXYmthHzxo'
 
-    #print('Limit:', limit, 'Used:', usage)
-    #print('Can use:', usage<limit)
-
-    metadata = {
-        'problem': 'Something that hte user asked',
-        'hyde': 'The generated response from the LLM',
-        'grounded': 'The grounded response using supporting/semantically similar documents',
-        'sequences': [{'name': 'Test', 'steps': ['a', 'b', 'c']}]
-    }
-
-    # create new record for usage
-    log_use(client, TEST_UID, metadata=metadata)
+    # Assuming ID valid and data is available
+    response: dict = get_video(client, videoId).data[0]
+    print(response)
