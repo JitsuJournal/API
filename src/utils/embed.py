@@ -51,4 +51,31 @@ def set_embedding_basic_info(start: int, timeout:int=5):
 # and store their embeddings with metadata.
 
 if __name__=="__main__":    
+    # For actually fetching and passing the thumbnail 
+    # along with the channel title, we need to 
+    # expand the videos table with fields for these values
+    # and then write a simple script for fetching data
+    # using the existing youtube data api serivce function
+    # and updating the video record
+    
+
+
+    # Create new rows for storing the channel title
+    # as uploaded_by and the thumbnail url as thumbnail
+    # NOTE: We can set the columns as not null later on
+
+    
+    # Fetch all the unique videos by video ID in the videos table
+
+    # Iterate over each of the id's and fetch their basic info 
+    # using the already created API
+
+    # With the fetched basic info, extract required values
+    # and update the table to contain the values
+
+
+    # TODO/NOTE: Verify the new columns are updated with values
+    
+    # TODO/NOTE: Once all data is upadated, go ahead
+    # and set the uploaded_by and thumbnail columns to NOT NULL    
     pass
