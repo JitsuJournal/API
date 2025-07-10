@@ -280,7 +280,7 @@ if __name__=="__main__":
     # Driver code for running the sequence building
     # from user jiu-jitsu problem pipeline
     #_main() # old driver code in func, commented out
-    nodes: Node = [
+    nodes: list[Node] = [
         {
             "id": "0625afa9-4998-43b5-9689-460786cefdff",
             "name": "Knee Slice",
@@ -342,7 +342,7 @@ if __name__=="__main__":
             ]
         }
     ]
-    edges: Edge = [
+    edges: list[Edge] = [
         {
             "id": "xy-edge_90e8e114-64ef-47b4-9895-9db8eb14d857-b_0625afa9-4998-43b5-9689-460786cefdff-a",
             "source_id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
@@ -399,22 +399,21 @@ if __name__=="__main__":
     # each root node to the leaf, taking notes into account
     extracted: list[str] = extract_paragraph(llm_client, str_nodes, str_edges).parsed
 
-    tutorials: dict = {}
+    tutorials: dict[str, Video] = {}
     for paragraph in extracted:
         # Create an embedded representation for each branch/paragraph
-        embedding: list[float] = create_embedding(llm_client, paragraph=extracted).embeddings[0].values
+        embedding: list[float] = create_embedding(llm_client, paragraph=paragraph).embeddings[0].values
 
         # Perform a similarity search to retrive simlar sequences
         similar: list[dict] = similarity_search(client=db_client, vector=embedding, 
-                                    match_threshold=0.75, match_count=5).data
+                                    match_threshold=0.75, match_count=3).data
 
         # Iterate over the similar sequences and 
         # use their tutorial id's to get metadata from video table
         for sequence in similar:
             videoId: str = sequence['video_id']
-
             # If it's data doesn't already exist in the tutorials dict
-            if videoId not in tutorials.keys():
+            if videoId not in tutorials: # checks keys
                 # Use the unique video id to get the video metadata
                 # from the videos table and pack into the video model/object
                 videoInfo: dict = get_video(client=db_client, id=videoId).data[0]
@@ -430,6 +429,4 @@ if __name__=="__main__":
     # Flatten data into a list of Video objects
     # to match the response model defined in the tutorials endpoint
     flattened: list[Video] = list(tutorials.values())
-    print(flattened)
-    print()
     print(f'Retrieved {len(flattened)} videos as recommendations')

@@ -4,8 +4,8 @@ from typing import Annotated
 # Local
 from src.models.general import UserQuery, Sequence, Graph, Video
 from src.models.reactflow import Node, Edge
-from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart, rename_add_notes
-from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use
+from src.services.llm import conn_gemini, create_paragraph, create_embedding, ground, extract_sequences, create_flowchart, rename_add_notes, extract_paragraph
+from src.services.db import conn_supabase, similarity_search, get_techniques, get_user_limit, get_usage, log_use, get_video
 # Third party
 import uvicorn # NOTE: Commented out for production
 from fastapi import FastAPI, Depends, HTTPException, status, Body
@@ -284,7 +284,14 @@ def solve(
 
 
 @app.post('/tutorials/', response_model=list[Video])
-def tutorials(nodes: list[Node], edges: list[Edge]):
+def tutorials(
+        nodes: list[Node], edges: list[Edge],
+        gemini: Annotated[LlmClient, Depends(conn_gemini)],
+        supabase: Annotated[DbClient, Depends(conn_supabase)],
+    ):
+    # TODO/NOTE: Complete function/endpoint doc for fastapi
+    # TODO/NOTE: Add error handling to make sure we're not missing anything
+
     # Define sample data that we can return for now
     # and use as reference for building the response model
     sample_output = [
@@ -309,7 +316,53 @@ def tutorials(nodes: list[Node], edges: list[Edge]):
             'uploaded_at': '2024, October 23'
         },
     ]
-    return sample_output
+    
+
+    # Pass nodes/edges to extract paragraph 
+    # and retrieve paragraphs representing going from
+    # each root node to the leaf, taking notes into account
+    extracted: list[str] = extract_paragraph(
+        client=gemini,nodes=nodes, edges=edges
+    ).parsed
+
+
+    # Iterate over each paragraph in extracted
+    # perform embedding, sim search, and store
+    # unique tutorials metadata in dict below
+    # NOTE: Will be turned to list[Video] before returning
+    tutorials: dict[str, Video] = {}
+    for paragraph in extracted:
+
+        # Create an embedded representation for each branch/paragraph
+        embedding: list[float] = create_embedding(gemini, paragraph).embeddings[0].values
+
+        # Perform a similarity search to retrive simlar sequences
+        similar: list[dict] = similarity_search(client=supabase, vector=embedding, 
+                                    match_threshold=0.75, match_count=3).data
+
+        # Iterate over the similar sequences and 
+        # use their tutorial id's to get metadata from video table
+        for sequence in similar:
+            videoId: str = sequence['video_id']
+            # If it's data doesn't already exist in the tutorials dict
+            if videoId not in tutorials: # checks keys
+                # Use the unique video id to get the video metadata
+                # from the videos table and pack into the video model/object
+                videoInfo: dict = get_video(client=supabase, id=videoId).data[0]
+                video = Video(
+                    id=videoId, title=videoInfo['title'],
+                    description=videoInfo['description'],
+                    uploaded_at=videoInfo['uploaded_at'],
+                )
+                # set video id as key and model as value 
+                # to add to the tutorials dict
+                tutorials[videoId] = video
+
+    # Flatten data into a list of Video objects
+    # to match the response model defined in the tutorials endpoint
+    output: list[Video] = list(tutorials.values())
+
+    return output
 
 
 # NOTE: Commented out driver code to avoid collisions 
