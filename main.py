@@ -354,6 +354,8 @@ def tutorials(
                             id=videoId, title=videoInfo['title'],
                             description=videoInfo['description'],
                             uploaded_at=videoInfo['uploaded_at'],
+                            uploaded_by=videoInfo['uploaded_by'],
+                            thumbnail=videoInfo['thumbnail'],
                         )
                         # set video id as key and model as value 
                         # to add to the tutorials dict
