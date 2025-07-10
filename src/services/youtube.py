@@ -29,6 +29,8 @@ def get_basic_info(client: Resource, videoId:str) -> Video | None:
             id=videoId, title=response['items'][0]['snippet']['title'],
             description=response['items'][0]['snippet']['description'],
             uploaded_at=response['items'][0]['snippet']['publishedAt'],
+            thumbnail=response['items'][0]['snippet']['thumbnails']['default']['url'],
+            uploaded_by=response['items'][0]['snippet']['channelTitle']
         )
     return reshaped
 
