@@ -83,6 +83,4 @@ def update_videos_thumbnail_channel(start:int, timeout: int=2):
 # and store their embeddings with metadata.
 
 if __name__=="__main__":    
-    # TODO/NOTE: Once all data is updated, go ahead
-    # and set the uploaded_by and thumbnail columns to NOT NULL
     pass
