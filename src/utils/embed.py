@@ -2,9 +2,10 @@
 import time
 # Local
 from ..models.general import Video
-from ..services.db import conn_supabase, get_unique_embedded_videoids, insert_video_record
+from ..services.db import conn_supabase, get_unique_embedded_videoids, insert_video_record, update_video_record
 from .. services.youtube import conn_youtube, get_basic_info
 # Third party
+from supabase import Client # imported for types since update_videos.. uses custom query
 
 def set_embedding_basic_info(start: int, timeout:int=5):
     """
@@ -38,11 +39,42 @@ def set_embedding_basic_info(start: int, timeout:int=5):
         time.sleep(timeout)
     return
 
-# 2) 
-# Given a jiu jitsu sequence branch represented
-# by a graph, perform a embedded similarity search
-# and return with another video for video info from videos table
-# NOTE: Complete the driver for this in the llm.py file
+def update_videos_thumbnail_channel(start:int, timeout: int=2):
+    """
+    For fetching and passing the thumbnail 
+    along with the channel title, we need to 
+    expand the videos table with fields for these values
+    and then write a simple script for fetching data
+    using the existing youtube data api serivce function
+    and updating the video record
+    """
+    # Initialize client for using the supabase 
+    # and the youtube data API's
+    db_client: Client = conn_supabase()
+    yt_client = conn_youtube()
+    
+    # Fetch all the unique videos by video ID in the videos table
+    response = (
+        db_client.table('videos')
+        .select('video_id')
+        .execute()
+    )
+
+    # Iterate over each of the id's 
+    # NOTE: Length is 180 rn (Jul 10, 2025)
+    # Going to run in batches to avoid hitting rate limits
+    for video in response.data[start:]:
+        # Fetch their basic info using the already
+        # created youtube service function
+        id = video['video_id']
+        metadata: Video = get_basic_info(yt_client, id)
+
+        # With the fetched basic info, extract required values
+        # and update the videos table to contain the values
+        response = update_video_record(db_client, metadata)
+        # Adding sleep to avoid hitting rate limits
+        time.sleep(timeout)
+    return
 
 # 3)
 # Review the usage script, mainly the queries
@@ -51,31 +83,6 @@ def set_embedding_basic_info(start: int, timeout:int=5):
 # and store their embeddings with metadata.
 
 if __name__=="__main__":    
-    # For actually fetching and passing the thumbnail 
-    # along with the channel title, we need to 
-    # expand the videos table with fields for these values
-    # and then write a simple script for fetching data
-    # using the existing youtube data api serivce function
-    # and updating the video record
-    
-
-
-    # Create new rows for storing the channel title
-    # as uploaded_by and the thumbnail url as thumbnail
-    # NOTE: We can set the columns as not null later on
-
-    
-    # Fetch all the unique videos by video ID in the videos table
-
-    # Iterate over each of the id's and fetch their basic info 
-    # using the already created API
-
-    # With the fetched basic info, extract required values
-    # and update the table to contain the values
-
-
-    # TODO/NOTE: Verify the new columns are updated with values
-    
-    # TODO/NOTE: Once all data is upadated, go ahead
-    # and set the uploaded_by and thumbnail columns to NOT NULL    
+    # TODO/NOTE: Once all data is updated, go ahead
+    # and set the uploaded_by and thumbnail columns to NOT NULL
     pass

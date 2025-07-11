@@ -198,6 +198,29 @@ def get_video(client: Client, id: str):
     )
     return response
 
+def update_video_record(client: Client, video: Video):
+    """
+    Given a video object, this function uses the db client,
+    connects to the videos table, and updates the values
+    to match the new video object, with the id being used
+    to identify which record to update.
+    """
+    # NOTE: Video.model_dump isn't consistent with the field names
+    # used in the database (the id is stored as video_id)
+    # so we reshape here before updating the database record
+    data = {
+        'video_id': video.id, 'title': video.title,
+        'description': video.description, 'uploaded_at': video.uploaded_at,
+        'uploaded_by': video.uploaded_by, 'thumbnail': video.thumbnail
+    }
+    response = (
+        client.table('videos')
+        .update(data)
+        .eq('video_id', video.id)
+        .execute()
+    )
+    return response
+
 
 if __name__=="__main__":    
     # Initialize db connection
