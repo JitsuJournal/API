@@ -332,7 +332,7 @@ def tutorials(
             # Perform a similarity search to retrive simlar sequences
             try:
                 similar: list[dict] = similarity_search(client=supabase, vector=embedding, 
-                                            match_threshold=0.75, match_count=3).data
+                                            match_threshold=0.75, match_count=5).data
             except:
                 # Skip the current paragraph if we failed to perform sim. search
                 # TODO/NOTE: Handle the case of empty below and throw error or log
