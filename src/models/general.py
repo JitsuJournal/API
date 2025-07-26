@@ -24,3 +24,12 @@ class Graph(BaseModel):
     # Directed graph representation
     nodes: list[Node]
     edges: list[Edge]
+
+
+class Video(BaseModel):
+    id: str # TODO: Add data validation by enforcing the length of the id
+    title: str
+    description: str | None
+    uploaded_at: str
+    uploaded_by: str # NOTE: Channel title always exists
+    thumbnail: str # NOTE: Default always exists in youtube

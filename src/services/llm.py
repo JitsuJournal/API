@@ -174,14 +174,47 @@ def rename_add_notes(client: genai.Client, problem: str, flowchart: str,
     )
     return renamed
 
+def extract_paragraph(client: genai.Client, nodes: str, edges: str):
+    """
+    Given a sequence represented by nodes and edges, forming a
+    directed graph, this function is responsible for creating
+    the text representation of the sequence. The representation
+    must be high in correctness, effectively capturing the branching
+    and nodes, from the root to leaf nodes. 
 
-if __name__=="__main__":
+    Response is generally used for performing similarity searches
+    and identifying tutorials teaching how to execute the sequence.
+    """
+    extracted = client.models.generate_content(
+        model='gemini-2.5-flash',
+        config=types.GenerateContentConfig(
+            system_instruction="You're a black belt/expert coach in brazilian jiu-jitsu, gi and no-gi.",
+            response_mime_type="application/json",
+            response_schema=list[str],
+            temperature=0.25,
+        ),
+        contents=[
+            nodes, edges, """
+            Convert the given nodes and edges that represent a jiu-jitsu sequence
+            from a direct graph into paragraphs for each branch, going from the root nodes
+            to the leaf nodes while taking the notes into consideration.
+            """
+        ]
+    )
+    return extracted
+
+
+# Driver for testing/developing 
+# the solve pipeline using a sample prompt
+def _main():
     import json
     from .db import conn_supabase, similarity_search, get_techniques
+    # LLM functions are simply directly referenced from the above code
 
     client = conn_gemini()
+
     problem = "Simple ways to pass an oppoennts open and closed guard when i'm in top position and go into better positions to then go finish strong with submissions"
-    solution = create_paragraph(client, problem) # NOTE: Need to switch to stronger model
+    solution = create_paragraph(client, problem)
 
     # Initialize supabase client
     supabase = conn_supabase()
@@ -231,7 +264,176 @@ if __name__=="__main__":
         sequences=sequences, similar=similar,
         techniques=techniques,
     ).parsed
-
     
+
     print('-'*15)
     print(renamed.model_dump_json(indent=2))
+    return
+
+# Driver for testing/developing
+# the tutorials pipeline using sample nodes/edges
+def _main2():
+    import json
+    from ..models.reactflow import Node, Edge
+    from ..models.general import Video
+    from ..services.db import conn_supabase, similarity_search, get_video
+
+    # Driver code for running the sequence building
+    # from user jiu-jitsu problem pipeline
+    #_main() # old driver code in func, commented out
+    nodes: list[Node] = [
+        {
+            "id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "name": "Knee Slice",
+            "tags": [
+                "trip",
+                "pass"
+            ]
+        },
+        {
+            "id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "name": "Standard Back Control",
+            "tags": [
+                "top"
+            ]
+        },
+        {
+            "id": "918e7f75-2db2-47eb-bc8c-835936d92f0a",
+            "name": "Triangle",
+            "tags": [
+                "artery"
+            ]
+        },
+        {
+            "id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "name": "Double Under",
+            "tags": [
+                "top",
+                "pass",
+                "standing"
+            ]
+        },
+        {
+            "id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "name": "Standard Side Control",
+            "tags": [
+                "seated",
+                "top"
+            ]
+        },
+        {
+            "id": "63a7913c-f3da-431f-8701-e18984762e59",
+            "name": "Arm Bar",
+            "tags": [
+                "elbow"
+            ]
+        },
+        {
+            "id": "65aa745b-41b5-442c-a99a-b9192f44350e",
+            "name": "Rear Naked Choke",
+            "tags": [
+                "artery"
+            ]
+        },
+        {
+            "id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "name": "Blast Double",
+            "tags": [
+                "wrestling"
+            ]
+        }
+    ]
+    edges: list[Edge] = [
+        {
+            "id": "xy-edge_90e8e114-64ef-47b4-9895-9db8eb14d857-b_0625afa9-4998-43b5-9689-460786cefdff-a",
+            "source_id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "target_id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "note": "From standing, use a blast double to drive forward. Execute a penetration step, driving the opponent's weight over their leg. Transition to a knee slice guard pass by driving your knee across the opponent's thigh, splitting their guard."
+        },
+        {
+            "id": "xy-edge_0625afa9-4998-43b5-9689-460786cefdff-b_5a3d6df5-60c3-40d7-9e78-28a8731958b2-a",
+            "source_id": "0625afa9-4998-43b5-9689-460786cefdff",
+            "target_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "note": "Secure standard side control by pinning the opponent's shoulders and hips, maintaining chest-to-chest contact. Ensure a tight cross-side position by replacing your knee with your hand."
+        },
+        {
+            "id": "xy-edge_5a3d6df5-60c3-40d7-9e78-28a8731958b2-b_63a7913c-f3da-431f-8701-e18984762e59-a",
+            "source_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "target_id": "63a7913c-f3da-431f-8701-e18984762e59",
+            "note": "From side control, control their arm across their body. Apply pressure for a straight arm bar by isolating their arm and controlling their head. Hyperextend the elbow."
+        },
+        {
+            "id": "xy-edge_5a3d6df5-60c3-40d7-9e78-28a8731958b2-b_918e7f75-2db2-47eb-bc8c-835936d92f0a-a",
+            "source_id": "5a3d6df5-60c3-40d7-9e78-28a8731958b2",
+            "target_id": "918e7f75-2db2-47eb-bc8c-835936d92f0a",
+            "note": "Alternatively, from side control, transition to the triangle choke by isolating an arm and controlling their head, using your legs to encircle the opponent's neck and one arm, constricting blood flow."
+        },
+        {
+            "id": "xy-edge_90e8e114-64ef-47b4-9895-9db8eb14d857-b_229f395b-3201-457c-a963-7e9a04dcab64-a",
+            "source_id": "90e8e114-64ef-47b4-9895-9db8eb14d857",
+            "target_id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "note": "From standing, if the knee cut is defended, transition to a double under pass. Side-step and level change, executing a penetration step. Pummel your hands inside while pushing the opponent's legs down."
+        },
+        {
+            "id": "xy-edge_229f395b-3201-457c-a963-7e9a04dcab64-b_10982656-8943-4ab4-bfe5-f7482c1adb55-a",
+            "source_id": "229f395b-3201-457c-a963-7e9a04dcab64",
+            "target_id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "note": "After the double under pass, transition to standard back control by securing both hooks and maintaining tight upper body control. Focus on clamping down and retracting the hip to finish."
+        },
+        {
+            "id": "xy-edge_10982656-8943-4ab4-bfe5-f7482c1adb55-b_65aa745b-41b5-442c-a99a-b9192f44350e-a",
+            "source_id": "10982656-8943-4ab4-bfe5-f7482c1adb55",
+            "target_id": "65aa745b-41b5-442c-a99a-b9192f44350e",
+            "note": "From back control, secure a rear naked choke (RNC) by wrapping one arm around their neck and using the other to tighten the grip, cutting off blood flow. Ensure you have a secure RNC grip before applying pressure."
+        }
+    ]
+
+    str_nodes: str = json.dumps(nodes)
+    str_edges:str = json.dumps(edges)
+
+    # Initialize supabase and gemini clients
+    llm_client = conn_gemini()
+    db_client = conn_supabase()
+
+    # Pass nodes/edges to extract paragraph 
+    # and retrieve paragraphs representing going from
+    # each root node to the leaf, taking notes into account
+    extracted: list[str] = extract_paragraph(llm_client, str_nodes, str_edges).parsed
+
+    tutorials: dict[str, Video] = {}
+    for paragraph in extracted:
+        # Create an embedded representation for each branch/paragraph
+        embedding: list[float] = create_embedding(llm_client, paragraph=paragraph).embeddings[0].values
+
+        # Perform a similarity search to retrive simlar sequences
+        similar: list[dict] = similarity_search(client=db_client, vector=embedding, 
+                                    match_threshold=0.75, match_count=3).data
+
+        # Iterate over the similar sequences and 
+        # use their tutorial id's to get metadata from video table
+        for sequence in similar:
+            videoId: str = sequence['video_id']
+            # If it's data doesn't already exist in the tutorials dict
+            if videoId not in tutorials: # checks keys
+                # Use the unique video id to get the video metadata
+                # from the videos table and pack into the video model/object
+                videoInfo: dict = get_video(client=db_client, id=videoId).data[0]
+                video = Video(
+                    id=videoId, title=videoInfo['title'],
+                    description=videoInfo['description'],
+                    uploaded_at=videoInfo['uploaded_at'],
+                    uploaded_by=videoInfo['uploaded_by'],
+                    thumbnail=videoInfo['thumbnail'],
+                )
+                # set video id as key and model as value 
+                # to add to the tutorials dict
+                tutorials[videoId] = video
+
+    # Flatten data into a list of Video objects
+    # to match the response model defined in the tutorials endpoint
+    flattened: list[Video] = list(tutorials.values())
+    print(f'Retrieved {len(flattened)} videos as recommendations')
+    return
+
+if __name__=="__main__":
+    _main2()

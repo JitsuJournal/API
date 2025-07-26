@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 # Local
+from ..models.general import Video
 # Third Party
 from supabase import create_client, Client
 
@@ -147,26 +148,87 @@ def log_use(client: Client, userid: str, feature:str='askai', metadata:dict|None
     )
     return
 
+def get_unique_embedded_videoids(client: Client) -> list[str]:
+    """
+    Given youtube data API client/resource, this function
+    returns a list of unique video id's. Used primarily in
+    utils.embed for getting metadata for already embedding videos
+    and storing their information in the videos table.
+    """
+    # Connect to existing embeddings table
+    # fetch all uniuqe video ID's stored
+    response = (
+        client.table("embeddings")
+        .select("video_id")
+        .execute()
+    )
+    uniqueIds: list[str] = list(dict.fromkeys(d['video_id'] for d in response.data))
+    return uniqueIds
 
-if __name__=="__main__":
-    TEST_UID:str = os.environ.get('HARRI_UID')
-    TEST2_UID:str = os.environ.get('HARRI2_UID')
-    
-    client=conn_supabase()
-    #techniques = get_techniques(client)
-    
-    #limit: int = get_user_limit(client, TEST_UID)
-    #usage: int = get_usage(client, TEST_UID)
+def insert_video_record(client: Client, video: Video):
+    """
+    Given a Video object from general models, 
+    this function is responsible for inserting it to the
+    videos table. Mostly used as a inside of admin run scripts.
+    """
+    response = (
+        client.table('videos')
+        .insert({
+            'video_id': video.id,
+            'title': video.title,
+            'description': video.description,
+            'uploaded_at': video.uploaded_at,
+        })
+        .execute()
+    )
+    return response
 
-    #print('Limit:', limit, 'Used:', usage)
-    #print('Can use:', usage<limit)
+def get_video(client: Client, id: str):
+    """
+    This function is used for getting the metadata
+    from the videos table for any given video's unique ID.
+    The response is usually used for recommending tutorials
+    or checking if we already have videos stored in our db.
+    """
+    response = (
+        client.table('videos')
+        .select('*')
+        .eq('video_id', id)
+        .execute()
+    )
+    return response
 
-    metadata = {
-        'problem': 'Something that hte user asked',
-        'hyde': 'The generated response from the LLM',
-        'grounded': 'The grounded response using supporting/semantically similar documents',
-        'sequences': [{'name': 'Test', 'steps': ['a', 'b', 'c']}]
+def update_video_record(client: Client, video: Video):
+    """
+    Given a video object, this function uses the db client,
+    connects to the videos table, and updates the values
+    to match the new video object, with the id being used
+    to identify which record to update.
+    """
+    # NOTE: Video.model_dump isn't consistent with the field names
+    # used in the database (the id is stored as video_id)
+    # so we reshape here before updating the database record
+    data = {
+        'video_id': video.id, 'title': video.title,
+        'description': video.description, 'uploaded_at': video.uploaded_at,
+        'uploaded_by': video.uploaded_by, 'thumbnail': video.thumbnail
     }
+    response = (
+        client.table('videos')
+        .update(data)
+        .eq('video_id', video.id)
+        .execute()
+    )
+    return response
 
-    # create new record for usage
-    log_use(client, TEST_UID, metadata=metadata)
+
+if __name__=="__main__":    
+    # Initialize db connection
+    client=conn_supabase()
+    
+    # Sample/test ID
+    videoId = '0iXYmthHzxo'
+
+    # Assuming ID valid and data is available
+    response: dict = get_video(client, videoId).data[0]
+    print(response)
